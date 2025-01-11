@@ -18,4 +18,5 @@ export interface VehiclePart {
   speedometer: Mesh
   gearSwitch: Mesh
   lightBack: Mesh
+  body: Mesh
 }

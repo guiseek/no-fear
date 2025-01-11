@@ -1,9 +1,9 @@
 import {DEG2RAD} from 'three/src/math/MathUtils.js'
-import {GLTF} from 'three/examples/jsm/Addons.js'
+import {Capsule, GLTF} from 'three/examples/jsm/Addons.js'
 import {VehiclePart} from '../interfaces'
 import {Camera, Input} from '../core'
 import {Group, MeshStandardMaterial, Vector3} from 'three'
-import {getByName} from '../utils'
+import {getBounds, getByName} from '../utils'
 
 export class Vehicle {
   #model: Group
@@ -18,7 +18,7 @@ export class Vehicle {
     tractionForceValue: 90000,
     airResistance: 0.015,
     rollingResistance: 10,
-    brakeForce: 300000,
+    brakeForce: 600000,
     lateralFriction: 0.7,
     maxSpeed: 360,
   }
@@ -41,6 +41,10 @@ export class Vehicle {
 
   get currentSpeed() {
     return this.#state.velocity.length()
+  }
+
+  get currentDirection() {
+    return this.#state.velocity.clone().normalize()
   }
 
   #part: VehiclePart
@@ -79,6 +83,7 @@ export class Vehicle {
       speedometer: getByName(this.model, 'SPEEDOMETER'),
       gearSwitch: getByName(this.model, 'GEAR_SWITCH'),
       lightBack: getByName(this.model, 'LIGHT_BACK'),
+      body: getByName(this.model, 'SUSPENSION_FRONT'),
     }
 
     this.#lightBack = this.#part.lightBack.material as MeshStandardMaterial
@@ -86,6 +91,10 @@ export class Vehicle {
 
   addCamera(camera: Camera) {
     this.#model.add(camera)
+  }
+
+  crash() {
+    this.#state.velocity.set(0, 0, 0)
   }
 
   update(deltaTime: number) {
@@ -197,7 +206,7 @@ export class Vehicle {
 
     /** Rotação do carro */
     const localVelocityZ = this.#state.velocity.dot(forwardDirection)
-    const turningRadius = Math.max(8, this.state.rpm / 20)
+    const turningRadius = Math.max(4, this.state.rpm / 30)
     this.#state.angularVelocity =
       (this.#state.steering * Math.abs(localVelocityZ)) / turningRadius
 

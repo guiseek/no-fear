@@ -1,4 +1,5 @@
 export * from './entries';
 export * from './event-emitter';
+export * from './get-bounds';
 export * from './get-by-name';
 export * from './inner';

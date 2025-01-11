@@ -9,6 +9,7 @@ import {
   HemisphereLight,
   DirectionalLight,
   AudioListener,
+  PointLight,
 } from 'three'
 import './style.scss'
 
@@ -18,6 +19,9 @@ const clock = new Clock()
 const camera = new Camera()
 
 const renderer = new Renderer(app)
+
+const pointLight = new PointLight(0xffffff, 1, 10)
+scene.add(pointLight)
 
 const dirLight = new DirectionalLight(0xffffff, 1)
 scene.add(dirLight)
