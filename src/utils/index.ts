@@ -1,3 +1,5 @@
+export * from './create';
+export * from './detect-device';
 export * from './entries';
 export * from './event-emitter';
 export * from './get-bounds';

@@ -48,3 +48,42 @@ body {
     width: 120px;
   }
 }
+
+menu {
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+
+    button {
+      /* Ellipse 4 */
+
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      left: 76px;
+      top: 164px;
+
+      background: #5334b0;
+      box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.6);
+
+      border: none;
+      border-radius: 50%;
+      &::after {
+        position: absolute;
+        width: 22.37px;
+        height: 11.69px;
+        left: 94.02px;
+        top: 198.63px;
+
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.3) 100%
+        );
+        transform: rotate(-29.58deg);
+      }
+    }
+  }
+}

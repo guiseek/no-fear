@@ -1,18 +1,19 @@
-import {Camera, Input, Loader, Renderer} from './core'
 import {loadEngineSound, EngineSound, inputState} from './infra'
+import {Camera, Input, Loader, Renderer} from './core'
 import {loadTrack, loadVehicle} from './entities'
+import {inputMapper} from './mappers'
+import {control} from './config'
 import {inner} from './utils'
 import {
   Clock,
   Scene,
   Vector3,
+  PointLight,
   HemisphereLight,
   DirectionalLight,
   AudioListener,
-  PointLight,
 } from 'three'
 import './style.scss'
-import {axes, buttons, control} from './config'
 
 const scene = new Scene()
 const clock = new Clock()
@@ -22,52 +23,41 @@ const camera = new Camera()
 const renderer = new Renderer(app)
 
 const pointLight = new PointLight(0xffffff, 1, 10)
-scene.add(pointLight)
-
 const dirLight = new DirectionalLight(0xffffff, 1)
-scene.add(dirLight)
-
 const hemiLight = new HemisphereLight(0xffffff, 1)
-scene.add(hemiLight)
-
-const loader = Loader.getInstance()
+scene.add(pointLight, dirLight, hemiLight)
 
 const input = Input.getInstance()
+const loader = Loader.getInstance()
 
 const init = async () => {
-  const mcLaren = await loader.gltf
-    .loadAsync('mclaren-mp45.glb')
-    .then(loadVehicle)
-
-  const track = await loader.gltf.loadAsync('track.glb').then(loadTrack)
+  const mcLaren = await loader.gltf.loadAsync('mclaren.glb').then(loadVehicle)
 
   // camera.position.set(0, 0.9, 0.2)
   camera.position.set(0, 1.1, -0.3)
   camera.lookAt(mcLaren.model.position.clone().add(new Vector3(0, -0.8, 12)))
   mcLaren.addCamera(camera)
-  scene.add(mcLaren.model)
+  mcLaren.model.position.set(-220, 0, -14)
+  mcLaren.model.rotation.set(0, -1.6, 0)
 
+  const track = await loader.gltf.loadAsync('track.glb').then(loadTrack)
   track.model.scale.setScalar(3)
-  scene.add(track.model)
 
-  const audioListener = new AudioListener()
-  camera.add(audioListener)
+  scene.add(track.model, mcLaren.model)
+
+  const listener = new AudioListener()
+  camera.add(listener)
 
   let engineSound: EngineSound
 
-  document.onclick = async () => {}
-
   input.on('update', async (state) => {
     if (!engineSound) {
-      engineSound = await loadEngineSound(audioListener)
+      engineSound = await loadEngineSound(listener)
     }
-    inputState.setDirections(state)
-    inputState.setButtons({
-      a: state.b,
-      b: state.up,
-      x: false,
-      y: state.down,
-    })
+
+    const mapped = inputMapper.fromKeyboard(state)
+    inputState.setDirections(mapped.directions)
+    inputState.setButtons(mapped.buttons)
   })
 
   input.on('p', () => {
@@ -78,31 +68,19 @@ const init = async () => {
 
   addEventListener('gamepadconnected', async () => {
     if (!engineSound) {
-      engineSound = await loadEngineSound(audioListener)
+      engineSound = await loadEngineSound(listener)
     }
 
     control.onGamepad = (_, gamepad) => {
       if (gamepad) {
-        {
-          const {x, y} = axes.handle(gamepad.axes)
-  
-          inputState.setDirections({
-            up: x === 0 && y === -1,
-            right: x === 1 && y === 0,
-            down: x === 0 && y === 1,
-            left: x === -1 && y === 0,
-          })
-        }
-  
-        {
-          const [x, a, b, y] = buttons.handle(gamepad.buttons)
-          inputState.setButtons({x, a, b, y})
-        }
+        const mapped = inputMapper.fromGamepad(gamepad)
+        inputState.setDirections(mapped.directions)
+        inputState.setButtons(mapped.buttons)
       }
     }
-  })
 
-  control.run()
+    control.run()
+  })
 
   const animate = () => {
     const delta = clock.getDelta()

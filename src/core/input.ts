@@ -1,13 +1,13 @@
 import {Callback, EventEmitter} from '../utils'
 
-type DirectionKey = 'up' | 'right' | 'down' | 'left'
+export type DirectionKey = 'up' | 'right' | 'down' | 'left'
 
-type EventKey = 'p' | 'b'
+export type EventKey = 'p' | 'b'
 
-type Directions = Record<DirectionKey, boolean>
-type EventKeys = Record<EventKey, boolean>
+export type Directions = Record<DirectionKey, boolean>
+export type EventKeys = Record<EventKey, boolean>
 
-type InputState = Directions & EventKeys
+export type InputState = Directions & EventKeys
 
 interface InputEventMap {
   update: InputState

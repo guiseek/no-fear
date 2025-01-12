@@ -1,13 +1,5 @@
 import {Audio, AudioListener} from 'three'
-
-export interface GearSettings {
-  minRPM: number
-  maxRPM: number
-  basePlaybackRate: number
-  maxPlaybackRate: number
-  baseVolume: number
-  maxVolume: number
-}
+import {GearSettings} from '../interfaces'
 
 export class GearSound extends Audio {
   constructor(

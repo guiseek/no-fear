@@ -22,10 +22,6 @@ export class Track {
     this.#part = {
       fence: getByName(this.model, 'FENCE'),
     }
-
-    console.log(this.#part);
-    
-    // this.#part.fence.geometry.computeBoundingBox()
   }
 }
 

@@ -1,13 +1,13 @@
 import {
   add,
   set,
+  use,
   Axes,
   Buttons,
   Control,
   GamepadAxes,
   GamepadButtons,
   GamepadControl,
-  use,
 } from './core'
 
 add({
@@ -35,4 +35,3 @@ export const control = use(Control)
 export const buttons = use(Buttons)
 
 export const axes = use(Axes)
-

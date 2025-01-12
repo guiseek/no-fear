@@ -1,13 +1,13 @@
-import {EngineSound, GearSettings} from '.'
+import {EngineSound} from './engine-sound'
+import {GearSettings} from '../interfaces'
 import {AudioListener} from 'three'
 import {Loader} from '../core'
 
 export const loadEngineSound = async (audioListener: AudioListener) => {
   const loader = Loader.getInstance()
 
+  const start = await loader.audio.loadAsync('start.wav')
   const buffer = await loader.audio.loadAsync('engine.wav')
-
-  const buffers = [buffer, buffer, buffer, buffer, buffer, buffer, buffer]
 
   const gearSettings: GearSettings[] = [
     {
@@ -29,7 +29,7 @@ export const loadEngineSound = async (audioListener: AudioListener) => {
     {
       minRPM: 1000,
       maxRPM: 2000,
-      basePlaybackRate: 1,
+      basePlaybackRate: 0.8,
       maxPlaybackRate: 1.6,
       baseVolume: 0.6,
       maxVolume: 1,
@@ -37,36 +37,36 @@ export const loadEngineSound = async (audioListener: AudioListener) => {
     {
       minRPM: 2000,
       maxRPM: 4000,
-      basePlaybackRate: 1.4,
-      maxPlaybackRate: 2,
+      basePlaybackRate: 1,
+      maxPlaybackRate: 1.8,
       baseVolume: 0.6,
       maxVolume: 1,
     },
     {
       minRPM: 4000,
       maxRPM: 6000,
-      basePlaybackRate: 1.6,
-      maxPlaybackRate: 2.2,
+      basePlaybackRate: 1.2,
+      maxPlaybackRate: 2,
       baseVolume: 0.6,
       maxVolume: 1,
     },
     {
       minRPM: 6000,
       maxRPM: 8000,
-      basePlaybackRate: 1.8,
-      maxPlaybackRate: 2.4,
+      basePlaybackRate: 1.4,
+      maxPlaybackRate: 2,
       baseVolume: 0.6,
       maxVolume: 1,
     },
     {
       minRPM: 8000,
       maxRPM: 12000,
-      basePlaybackRate: 2,
-      maxPlaybackRate: 2.8,
+      basePlaybackRate: 1.6,
+      maxPlaybackRate: 2.2,
       baseVolume: 0.6,
       maxVolume: 1,
     },
   ]
 
-  return new EngineSound(audioListener, buffers, gearSettings)
+  return new EngineSound(audioListener, start, buffer, gearSettings)
 }

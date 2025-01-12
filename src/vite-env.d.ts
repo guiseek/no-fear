@@ -3,3 +3,5 @@
 
 declare const app: HTMLDivElement
 declare const velocity: HTMLElement
+
+declare const mobileInput: HTMLTemplateElement

@@ -15,7 +15,6 @@ interface Wheel {
 export interface VehiclePart {
   wheel: Wheel
   steering: Object3D
-  speedometer: Mesh
   gearSwitch: Mesh
   lightBack: Mesh
   body: Mesh

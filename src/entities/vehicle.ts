@@ -88,8 +88,6 @@ export class Vehicle {
 
       steering: getByName(this.model, 'STEERING_WHEEL'),
 
-      speedometer: getByName(this.model, 'SPEEDOMETER'),
-
       gearSwitch: getByName(this.model, 'GEAR_SWITCH'),
 
       lightBack: getByName(this.model, 'LIGHT_BACK'),
