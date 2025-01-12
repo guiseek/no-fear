@@ -19,7 +19,7 @@ export class Vehicle {
     tractionForceValue: 90000,
     airResistance: 0.015,
     rollingResistance: 10,
-    brakeForce: 600000,
+    brakeForce: 500000,
     lateralFriction: 0.7,
     maxSpeed: 360,
   }
