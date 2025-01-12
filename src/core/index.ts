@@ -1,3 +1,5 @@
+export * from './di';
+export * from './gamepad';
 export * from './camera';
 export * from './collision';
 export * from './controls';

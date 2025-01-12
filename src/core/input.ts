@@ -1,16 +1,22 @@
 import {Callback, EventEmitter} from '../utils'
 
-type ControlKey = 'up' | 'right' | 'down' | 'left' | 'space'
+type DirectionKey = 'up' | 'right' | 'down' | 'left'
 
-type EventKey = 'p' | 'v' | 's' | 'a' | 'z'
+type EventKey = 'p' | 'b'
+
+type Directions = Record<DirectionKey, boolean>
+type EventKeys = Record<EventKey, boolean>
+
+type InputState = Directions & EventKeys
 
 interface InputEventMap {
-  change: {key: ControlKey; prev: boolean; next: boolean}
-  s: boolean
+  update: InputState
   p: boolean
-  v: boolean
-  a: boolean
-  z: boolean
+  b: boolean
+  up: boolean
+  right: boolean
+  down: boolean
+  left: boolean
 }
 
 export class Input {
@@ -21,7 +27,8 @@ export class Input {
     right: false,
     down: false,
     left: false,
-    space: false,
+    p: false,
+    b: false
   }
 
   get state() {
@@ -46,34 +53,20 @@ export class Input {
   #onKeyDown = ({code}: KeyboardEvent) => {
     const key = this.#normalize(code)
 
-    if (this.#isControl(key)) {
-      if (this.#state[key] !== true) {
-        const prev = this.#state[key]
-        const next = true
-
-        this.#emitter.emit('change', {key, prev, next})
-      }
-
+    if (this.#isKeyCode(key)) {
       this.#state[key] = true
-    }
-
-    if (this.#isEvent(key)) {
       this.#emitter.emit(key, true)
+      this.#emitter.emit('update', this.state)
     }
   }
 
   #onKeyUp = ({code}: KeyboardEvent) => {
     const key = this.#normalize(code)
 
-    if (this.#isControl(key)) {
-      if (this.#state[key] !== false) {
-        const prev = this.#state[key]
-        const next = false
-
-        this.#emitter.emit('change', {key, prev, next})
-      }
-
+    if (this.#isKeyCode(key)) {
       this.#state[key] = false
+      this.#emitter.emit(key, false)
+      this.#emitter.emit('update', this.state)
     }
   }
 
@@ -84,12 +77,8 @@ export class Input {
     this.#emitter.on(event, callback)
   }
 
-  #isControl(key: string): key is ControlKey {
-    return Object.keys(this.#state).includes(key)
-  }
-
-  #isEvent(key: string): key is EventKey {
-    return ['p', 'v', 's', 'a', 'z'].includes(key)
+  #isKeyCode(key: string): key is EventKey {
+    return ['p', 'b', 'up', 'right', 'down', 'left'].includes(key)
   }
 
   #normalize(code: string) {

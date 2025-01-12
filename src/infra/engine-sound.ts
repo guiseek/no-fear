@@ -34,9 +34,13 @@ export class EngineSound {
   stop() {
     this.gears[this.activeGearIndex].play()
   }
-  
+
   pause() {
-    this.gears[this.activeGearIndex].pause()
+    if (this.gears[this.activeGearIndex].isPlaying) {
+      this.gears[this.activeGearIndex].pause()
+    } else {
+      this.gears[this.activeGearIndex].play()
+    }
   }
 
   update(rpm: number) {

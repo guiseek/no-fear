@@ -1,9 +1,10 @@
-import {DEG2RAD} from 'three/src/math/MathUtils.js'
-import {Capsule, GLTF} from 'three/examples/jsm/Addons.js'
-import {VehiclePart} from '../interfaces'
-import {Camera, Input} from '../core'
 import {Group, MeshStandardMaterial, Vector3} from 'three'
-import {getBounds, getByName} from '../utils'
+import {DEG2RAD} from 'three/src/math/MathUtils.js'
+import {GLTF} from 'three/examples/jsm/Addons.js'
+import {VehiclePart} from '../interfaces'
+import {inputState} from '../infra'
+import {getByName} from '../utils'
+import {Camera} from '../core'
 
 export class Vehicle {
   #model: Group
@@ -55,8 +56,6 @@ export class Vehicle {
 
   #lightBack: MeshStandardMaterial
 
-  #input = Input.getInstance()
-
   constructor({scene}: GLTF) {
     this.#model = scene
 
@@ -64,25 +63,37 @@ export class Vehicle {
       wheel: {
         front: {
           left: getByName(this.model, 'WHEEL_LEFT_FRONT'),
+
           right: getByName(this.model, 'WHEEL_RIGHT_FRONT'),
         },
+
         hub: {
           left: getByName(this.model, 'WHEEL_LEFT_FRONT_HUB'),
+
           right: getByName(this.model, 'WHEEL_RIGHT_FRONT_HUB'),
         },
+
         parent: {
           left: getByName(this.model, 'WHEEL_LEFT_FRONT_PARENT'),
+
           right: getByName(this.model, 'WHEEL_RIGHT_FRONT_PARENT'),
         },
+
         back: {
           left: getByName(this.model, 'WHEEL_LEFT_BACK'),
+
           right: getByName(this.model, 'WHEEL_RIGHT_BACK'),
         },
       },
+
       steering: getByName(this.model, 'STEERING_WHEEL'),
+
       speedometer: getByName(this.model, 'SPEEDOMETER'),
+
       gearSwitch: getByName(this.model, 'GEAR_SWITCH'),
+
       lightBack: getByName(this.model, 'LIGHT_BACK'),
+
       body: getByName(this.model, 'SUSPENSION_FRONT'),
     }
 
@@ -108,9 +119,9 @@ export class Vehicle {
     const cosRotation = Math.cos(carRotation)
 
     /** Aplica força de tração */
-    if (this.#input.state.up) {
+    if (inputState.button.b) {
       this.#state.tractionForce.set(0, 0, this.#settings.tractionForceValue)
-    } else if (this.#input.state.down) {
+    } else if (inputState.button.y) {
       this.#state.tractionForce.set(
         0,
         0,
@@ -137,7 +148,7 @@ export class Vehicle {
      * Ajustável em `#settings.brakeForce`
      */
     const brakeForce = new Vector3()
-    const isBraking = this.#input.state.space
+    const isBraking = inputState.button.a
 
     this.#lightBack.emissiveIntensity = isBraking ? 1 : 0
 
@@ -221,7 +232,7 @@ export class Vehicle {
   #syncWheels(deltaTime: number) {
     const steeringSpeed = 2 * deltaTime
     const steeringInput =
-      (this.#input.state.left ? 1 : 0) - (this.#input.state.right ? 1 : 0)
+      (inputState.direction.left ? 1 : 0) - (inputState.direction.right ? 1 : 0)
 
     /** Atualiza direção */
     if (steeringInput === 0) {
@@ -249,9 +260,9 @@ export class Vehicle {
 
     this.#part.steering.rotation.y = this.#state.angle * 3
 
-    // this.#head.rotation.y = this.#state.angle * 0.6
-
-    /** Sincroniza as rodas */
+    /**
+     * Sincroniza as rodas
+     */
     const wheelRadius = 0.5
     const localVelocityZ = this.#state.velocity.dot(
       new Vector3(
