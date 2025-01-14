@@ -1,4 +1,4 @@
-import {DRACOLoader, GLTFLoader, RGBELoader} from 'three/examples/jsm/Addons.js'
+import {DRACOLoader, FontLoader, GLTFLoader, RGBELoader} from 'three/examples/jsm/Addons.js'
 import {AudioLoader} from 'three'
 
 export class Loader {
@@ -9,6 +9,8 @@ export class Loader {
   rgbe: RGBELoader
 
   audio: AudioLoader
+
+  font: FontLoader
 
   static getInstance() {
     if (!this.instance) {
@@ -24,6 +26,9 @@ export class Loader {
 
     this.audio = new AudioLoader()
     this.audio.setPath('sounds/')
+    
+    this.font = new FontLoader()
+    this.font.setPath('fonts/')
 
     this.gltf = new GLTFLoader()
     this.gltf.setPath('models/')

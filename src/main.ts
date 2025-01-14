@@ -1,7 +1,7 @@
-import {loadEngineSound, EngineSound, inputState} from './infra'
+import {loadEngine, loadTrack, loadVehicle} from './entities'
 import {Camera, Input, Loader, Renderer} from './core'
-import {loadTrack, loadVehicle} from './entities'
 import {inputMapper} from './mappers'
+import {inputState} from './infra'
 import {control} from './config'
 import {inner} from './utils'
 import {
@@ -12,10 +12,12 @@ import {
   HemisphereLight,
   DirectionalLight,
   AudioListener,
+  SpotLight,
 } from 'three'
 import './style.scss'
 
 const scene = new Scene()
+// scene.background = new Color(0xffffff)
 const clock = new Clock()
 
 const camera = new Camera()
@@ -23,21 +25,41 @@ const camera = new Camera()
 const renderer = new Renderer(app)
 
 const pointLight = new PointLight(0xffffff, 1, 10)
+pointLight.lookAt(0, 0, 0)
+
 const dirLight = new DirectionalLight(0xffffff, 1)
+
 const hemiLight = new HemisphereLight(0xffffff, 1)
-scene.add(pointLight, dirLight, hemiLight)
+
+const spotLight = new SpotLight(0xffffff, 1, 10, 1)
+spotLight.lookAt(0, 0, 0)
+
+scene.add(pointLight, dirLight, hemiLight, spotLight)
 
 const input = Input.getInstance()
 const loader = Loader.getInstance()
 
 const init = async () => {
-  const mcLaren = await loader.gltf.loadAsync('mclaren.glb').then(loadVehicle)
+  const font = await loader.font.loadAsync(
+    'seven-segment-regular.typeface.json'
+  )
 
-  // camera.position.set(0, 0.9, 0.2)
-  camera.position.set(0, 1.1, -0.3)
+  const listener = new AudioListener()
+  camera.add(listener)
+
+  const engine = await loadEngine(listener)
+
+  const mcLaren = await loader.gltf
+    .loadAsync('mclaren.glb')
+    .then(loadVehicle(engine, font))
+
+  
+  // camera.position.set(0, 1.4, -0.42)
+  camera.position.set(0, 1.2, -0.3)
   camera.lookAt(mcLaren.model.position.clone().add(new Vector3(0, -0.8, 12)))
   mcLaren.addCamera(camera)
-  mcLaren.model.position.set(-220, 0, -14)
+  // mcLaren.model.position.set(-220, 0, -14)
+  mcLaren.model.position.set(0, 0, 1)
   mcLaren.model.rotation.set(0, -1.6, 0)
 
   const track = await loader.gltf.loadAsync('track.glb').then(loadTrack)
@@ -45,32 +67,13 @@ const init = async () => {
 
   scene.add(track.model, mcLaren.model)
 
-  const listener = new AudioListener()
-  camera.add(listener)
-
-  let engineSound: EngineSound
-
   input.on('update', async (state) => {
-    if (!engineSound) {
-      engineSound = await loadEngineSound(listener)
-    }
-
     const mapped = inputMapper.fromKeyboard(state)
     inputState.setDirections(mapped.directions)
     inputState.setButtons(mapped.buttons)
   })
 
-  input.on('p', () => {
-    if (engineSound) {
-      engineSound.pause()
-    }
-  })
-
   addEventListener('gamepadconnected', async () => {
-    if (!engineSound) {
-      engineSound = await loadEngineSound(listener)
-    }
-
     control.onGamepad = (_, gamepad) => {
       if (gamepad) {
         const mapped = inputMapper.fromGamepad(gamepad)
@@ -87,10 +90,6 @@ const init = async () => {
 
     mcLaren.update(delta)
 
-    if (engineSound) {
-      engineSound.update(mcLaren.state.rpm)
-    }
-
     renderer.render(scene, camera)
     requestAnimationFrame(animate)
   }
@@ -105,4 +104,6 @@ const init = async () => {
   })
 }
 
-init()
+input.on('s', (state) => {
+  if (state) init()
+})

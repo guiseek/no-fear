@@ -12,10 +12,17 @@ interface Wheel {
   back: DoubleSides
 }
 
+export interface VehiclePanel {
+  rpm: Mesh
+  gear: Mesh
+  velocity: Mesh
+}
+
 export interface VehiclePart {
   wheel: Wheel
   steering: Object3D
   gearSwitch: Mesh
   lightBack: Mesh
+  panel: VehiclePanel
   body: Mesh
 }

@@ -1,9 +1,10 @@
 import {Group, MeshStandardMaterial, Vector3} from 'three'
+import {Font, GLTF, TextGeometry} from 'three/examples/jsm/Addons.js'
 import {DEG2RAD} from 'three/src/math/MathUtils.js'
-import {GLTF} from 'three/examples/jsm/Addons.js'
 import {VehiclePart} from '../interfaces'
 import {inputState} from '../infra'
-import {getByName} from '../utils'
+import {getBoundingBox, getByName} from '../utils'
+import {Engine} from './engine'
 import {Camera} from '../core'
 
 export class Vehicle {
@@ -21,7 +22,7 @@ export class Vehicle {
     rollingResistance: 10,
     brakeForce: 500000,
     lateralFriction: 0.7,
-    maxSpeed: 360,
+    maxSpeed: 460,
   }
 
   #state = {
@@ -56,44 +57,51 @@ export class Vehicle {
 
   #lightBack: MeshStandardMaterial
 
-  constructor({scene}: GLTF) {
+  constructor({scene}: GLTF, private engine: Engine, private font: Font) {
     this.#model = scene
 
     this.#part = {
       wheel: {
         front: {
           left: getByName(this.model, 'WHEEL_LEFT_FRONT'),
-
           right: getByName(this.model, 'WHEEL_RIGHT_FRONT'),
         },
 
         hub: {
           left: getByName(this.model, 'WHEEL_LEFT_FRONT_HUB'),
-
           right: getByName(this.model, 'WHEEL_RIGHT_FRONT_HUB'),
         },
 
         parent: {
           left: getByName(this.model, 'WHEEL_LEFT_FRONT_PARENT'),
-
           right: getByName(this.model, 'WHEEL_RIGHT_FRONT_PARENT'),
         },
 
         back: {
           left: getByName(this.model, 'WHEEL_LEFT_BACK'),
-
           right: getByName(this.model, 'WHEEL_RIGHT_BACK'),
         },
       },
-
+      panel: {
+        rpm: getByName(this.model, 'PANEL_RPM'),
+        gear: getByName(this.model, 'PANEL_GEAR'),
+        velocity: getByName(this.model, 'PANEL_VELOCITY'),
+      },
       steering: getByName(this.model, 'STEERING_WHEEL'),
-
       gearSwitch: getByName(this.model, 'GEAR_SWITCH'),
-
       lightBack: getByName(this.model, 'LIGHT_BACK'),
-
       body: getByName(this.model, 'SUSPENSION_FRONT'),
     }
+
+    this.part.panel.rpm.rotateX(-Math.PI / 2)
+    this.part.panel.gear.rotateX(-Math.PI / 2)
+    this.part.panel.velocity.rotateX(-Math.PI / 2)
+
+    this.part.panel.gear.position.x = -0.02
+    this.part.panel.gear.position.y += 0.01
+
+    this.part.panel.velocity.position.x = -0.055
+    this.part.panel.velocity.position.y += 0.01
 
     this.#lightBack = this.#part.lightBack.material as MeshStandardMaterial
   }
@@ -107,8 +115,45 @@ export class Vehicle {
   }
 
   update(deltaTime: number) {
+    this.engine.update(this.#state.rpm)
     this.#syncLocation(deltaTime)
     this.#syncWheels(deltaTime)
+    this.#syncPanel()
+  }
+
+  #syncPanel() {
+    {
+      const velocity = this.#state.velocity.length()
+      const geometry = this.#createPanelText(velocity)
+
+      const {x, y, z} = getBoundingBox(geometry)
+
+      geometry.translate(-x, -y, -z)
+
+      this.part.panel.velocity.geometry.dispose()
+      this.part.panel.velocity.geometry = geometry
+    }
+
+    {
+      const gear = this.engine.gear
+      const geometry = this.#createPanelText(gear)
+
+      const {x, y, z} = getBoundingBox(geometry)
+
+      geometry.translate(-x, -y, -z)
+
+      this.part.panel.gear.geometry.dispose()
+      this.part.panel.gear.geometry = geometry
+    }
+  }
+  #createPanelText(value: number) {
+    const font = this.font
+
+    const depth = 0
+    const size = 0.012
+    const bevelSize = 0.01
+
+    return new TextGeometry(value.toFixed(), {font, size, bevelSize, depth})
   }
 
   #syncLocation(deltaTime: number) {
@@ -281,4 +326,8 @@ export class Vehicle {
   }
 }
 
-export const loadVehicle = (gltf: GLTF) => new Vehicle(gltf)
+export const loadVehicle = (engine: Engine, font: Font) => {
+  return (gltf: GLTF) => {
+    return new Vehicle(gltf, engine, font)
+  }
+}
