@@ -2,7 +2,7 @@ import {Callback, EventEmitter} from '../utils'
 
 export type DirectionKey = 'up' | 'right' | 'down' | 'left'
 
-export type EventKey = 'p' | 'b' | 's'
+export type EventKey = 'p' | 'b' | 's' | 'r'
 
 export type Directions = Record<DirectionKey, boolean>
 export type EventKeys = Record<EventKey, boolean>
@@ -14,6 +14,7 @@ interface InputEventMap {
   p: boolean
   b: boolean
   s: boolean
+  r: boolean
   up: boolean
   right: boolean
   down: boolean
@@ -30,7 +31,8 @@ export class Input {
     left: false,
     s: false,
     p: false,
-    b: false
+    b: false,
+    r: false,
   }
 
   get state() {
@@ -80,7 +82,7 @@ export class Input {
   }
 
   #isKeyCode(key: string): key is EventKey {
-    return ['p', 'b', 's', 'up', 'right', 'down', 'left'].includes(key)
+    return ['p', 'b', 's', 'r', 'up', 'right', 'down', 'left'].includes(key)
   }
 
   #normalize(code: string) {

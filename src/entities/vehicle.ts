@@ -15,14 +15,14 @@ export class Vehicle {
   }
 
   #settings = {
-    mass: 6000,
-    deceleration: 20,
-    tractionForceValue: 90000,
+    mass: 540,
+    deceleration: 30,
+    tractionForceValue: 12000,
     airResistance: 0.015,
-    rollingResistance: 10,
-    brakeForce: 500000,
-    lateralFriction: 0.7,
-    maxSpeed: 460,
+    rollingResistance: 16,
+    brakeForce: 40000,
+    lateralFriction: 0.8,
+    maxSpeed: 360,
   }
 
   #state = {

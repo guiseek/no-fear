@@ -13,6 +13,7 @@ body {
 body {
   margin: 0;
   background-color: #020202;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #app {
@@ -21,7 +22,25 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
 
+#start {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff60;
+  
+  h2 {
+    font-weight: normal;
+  }
+
+  animation: text-blur-out 2s ease-in-out infinite alternate both;
+
+  h1 {
+    color: #ffffff;
+  }
 }
 
 menu {
@@ -60,5 +79,14 @@ menu {
         transform: rotate(-29.58deg);
       }
     }
+  }
+}
+
+@keyframes text-blur-out {
+  0% {
+    filter: blur(0.01);
+  }
+  100% {
+    filter: blur(12px) opacity(0);
   }
 }

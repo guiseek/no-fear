@@ -2,6 +2,6 @@
 
 
 declare const app: HTMLDivElement
-declare const velocity: HTMLElement
+declare const start: HTMLElement
 
 declare const mobileInput: HTMLTemplateElement
