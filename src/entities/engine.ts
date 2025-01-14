@@ -78,7 +78,7 @@ export const loadEngine = async (listener: AudioListener) => {
       volume: {min: 0.8, max: 1},
     },
     {
-      rpm: {min: 6200, max: 1200},
+      rpm: {min: 5200, max: 1200},
       playbackRate: {min: 1.2, max: 1.6},
       volume: {min: 0.8, max: 1},
     },

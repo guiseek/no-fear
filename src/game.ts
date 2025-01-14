@@ -1,7 +1,5 @@
 import {loadEngine, loadTrack, loadVehicle} from './entities'
-import {Body, SAPBroadphase, Vec3, World} from 'cannon-es'
 import {Camera, Input, Loader, Renderer} from './core'
-import CannonDebugger from 'cannon-es-debugger'
 import {inputMapper} from './mappers'
 import {inputState} from './infra'
 import {control} from './config'
