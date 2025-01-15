@@ -4,4 +4,5 @@ export * from './gear-settings';
 export * from './range-value';
 export * from './track-part';
 export * from './type';
+export * from './updatable';
 export * from './vehicle-part';

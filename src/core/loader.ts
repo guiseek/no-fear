@@ -1,5 +1,11 @@
-import {DRACOLoader, FontLoader, GLTFLoader, RGBELoader} from 'three/examples/jsm/Addons.js'
 import {AudioLoader} from 'three'
+import {create} from '../utils'
+import {
+  DRACOLoader,
+  FontLoader,
+  GLTFLoader,
+  RGBELoader,
+} from 'three/examples/jsm/Addons.js'
 
 export class Loader {
   private static instance: Loader
@@ -26,7 +32,7 @@ export class Loader {
 
     this.audio = new AudioLoader()
     this.audio.setPath('sounds/')
-    
+
     this.font = new FontLoader()
     this.font.setPath('fonts/')
 
@@ -37,5 +43,31 @@ export class Loader {
     draco.setDecoderPath('js/')
 
     this.gltf.setDRACOLoader(draco)
+  }
+
+  loadGLTF(url: string, name: string) {
+    return this.gltf.loadAsync(url, this.#createProgress(name))
+  }
+
+  loadFont(url: string, name: string) {
+    return this.font.loadAsync(url, this.#createProgress(name))
+  }
+
+  loadAudio(url: string, name: string) {
+    return this.audio.loadAsync(url, this.#createProgress(name))
+  }
+
+  #createProgress(name: string) {
+    const el = create('progress', {max: 100, value: 0})
+    const text = new Text(`${name} - 0%`)
+    const item = create('li', {}, el, text)
+    progress.appendChild(item)
+
+    return ({loaded, total}: ProgressEvent) => {
+      const percent = (loaded / total) * 100
+      text.textContent = `${name} - ${percent.toFixed()}%`
+      el.value = +percent.toFixed()
+      if (el.value === 100) item.remove()
+    }
   }
 }

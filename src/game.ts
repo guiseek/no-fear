@@ -1,5 +1,6 @@
 import {loadEngine, loadTrack, loadVehicle} from './entities'
 import {Camera, Input, Loader, Renderer} from './core'
+import {Updatable} from './interfaces'
 import {inputMapper} from './mappers'
 import {inputState} from './infra'
 import {control} from './config'
@@ -33,6 +34,8 @@ export class Game {
 
   #started = false
 
+  #updatables = new Set<Updatable>()
+
   constructor() {
     this.pointLight.lookAt(0, 0, 0)
     this.spotLight.lookAt(0, 0, 0)
@@ -44,28 +47,35 @@ export class Game {
       this.spotLight
     )
 
+    start.hidden = false
+
     this.input.on('s', (state) => {
       if (state && !this.#started) {
-        this.initialize()
-        this.#started = true
-        start.remove()
+        this.loadAll().then(() => {
+          this.initialize()
+          this.#started = true
+          start.remove()
+        })
       }
     })
   }
 
-  initialize = async () => {
-    const font = await this.loader.font.loadAsync(
-      'seven-segment-regular.typeface.json'
-    )
-
+  async loadAll() {
     const listener = new AudioListener()
     this.camera.add(listener)
 
     const engine = await loadEngine(listener)
 
-    const mcLaren = await this.loader.gltf
-      .loadAsync('mclaren.glb')
+    const font = await this.loader.loadFont(
+      'seven-segment-regular.typeface.json',
+      'Seven segment font'
+    )
+
+    const mcLaren = await this.loader
+      .loadGLTF('mclaren.glb', 'McLaren model')
       .then(loadVehicle(engine, font))
+
+    this.#updatables.add(mcLaren)
 
     this.camera.position.set(0, 1.2, -0.3)
     this.camera.lookAt(
@@ -85,15 +95,22 @@ export class Game {
       }
     })
 
-    const track = await this.loader.gltf.loadAsync('track.glb').then(loadTrack)
+    const track = await this.loader
+      .loadGLTF('track.glb', 'Track model')
+      .then(loadTrack)
+
     track.model.scale.setScalar(3)
 
     this.scene.add(track.model, mcLaren.model)
+  }
 
+  initialize = async () => {
     const animate = () => {
       const delta = this.clock.getDelta()
 
-      mcLaren.update(delta)
+      for (const updatable of this.#updatables) {
+        updatable.update(delta)
+      }
 
       this.renderer.render(this.scene, this.camera)
       requestAnimationFrame(animate)

@@ -44,7 +44,7 @@ export class Engine {
 export const loadEngine = async (listener: AudioListener) => {
   const loader = Loader.getInstance()
 
-  const buffer = await loader.audio.loadAsync('engine.wav')
+  const buffer = await loader.loadAudio('engine.wav', 'Engine audio')
 
   const options: GearOptions[] = [
     {
