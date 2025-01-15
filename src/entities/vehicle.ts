@@ -16,12 +16,12 @@ export class Vehicle {
 
   #settings = {
     mass: 540,
-    deceleration: 30,
+    deceleration: 24,
     tractionForceValue: 12000,
     airResistance: 0.015,
-    rollingResistance: 16,
-    brakeForce: 40000,
-    lateralFriction: 0.8,
+    rollingResistance: 12,
+    brakeForce: 50000,
+    lateralFriction: 0.7,
     maxSpeed: 360,
   }
 
@@ -260,7 +260,7 @@ export class Vehicle {
 
     /** Rotação do carro */
     const localVelocityZ = this.#state.velocity.dot(forwardDirection)
-    const turningRadius = Math.max(4, this.state.rpm / 30)
+    const turningRadius = Math.max(8, this.state.rpm / 24)
     this.#state.angularVelocity =
       (this.#state.steering * Math.abs(localVelocityZ)) / turningRadius
 

@@ -49,6 +49,10 @@ export class Loader {
     return this.gltf.loadAsync(url, this.#createProgress(name))
   }
 
+  loadEnv(url: string, name: string) {
+    return this.rgbe.loadAsync(url, this.#createProgress(name))
+  }
+
   loadFont(url: string, name: string) {
     return this.font.loadAsync(url, this.#createProgress(name))
   }

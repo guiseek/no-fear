@@ -61,6 +61,7 @@ export class Game {
   }
 
   async loadAll() {
+
     const listener = new AudioListener()
     this.camera.add(listener)
 
@@ -96,10 +97,10 @@ export class Game {
     })
 
     const track = await this.loader
-      .loadGLTF('track.glb', 'Track model')
+      .loadGLTF('track2.glb', 'Track model')
       .then(loadTrack)
 
-    track.model.scale.setScalar(3)
+    // track.model.scale.setScalar(3)
 
     this.scene.add(track.model, mcLaren.model)
   }
