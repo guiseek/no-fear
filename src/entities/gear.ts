@@ -33,9 +33,13 @@ export class Gear {
       normalized
     )
     this.#audio.setPlaybackRate(playbackRate)
+    this.#audio.setDetune(playbackRate * 100 * -1)
 
     const volume = this.#normalizeRange(this.options.volume, normalized)
     this.#audio.setVolume(volume)
+
+    // this.#audio.setDetune(playbackRate * normalized * 100 * -1)
+    // console.log(this.#audio.detune)
   }
 
   #normalizeRange(range: RangeValue, rpm: number) {

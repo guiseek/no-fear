@@ -1,15 +1,11 @@
 import {Mesh, Object3D} from 'three'
+import {TwoSides} from './two-sides'
 
-interface DoubleSides {
-  left: Object3D
-  right: Object3D
-}
-
-interface Wheel {
-  front: DoubleSides
-  hub: DoubleSides
-  parent: DoubleSides
-  back: DoubleSides
+export interface VehicleWheel {
+  front: TwoSides
+  hub: TwoSides
+  parent: TwoSides
+  back: TwoSides
 }
 
 export interface VehiclePanel {
@@ -18,8 +14,19 @@ export interface VehiclePanel {
   velocity: Mesh
 }
 
+export interface VehicleCollisionWheel {
+  front: TwoSides<Mesh>
+  back: TwoSides<Mesh>
+}
+
+export interface VehicleCollision {
+  body: Mesh
+  wheel: VehicleCollisionWheel
+}
+
 export interface VehiclePart {
-  wheel: Wheel
+  collision: VehicleCollision
+  wheel: VehicleWheel
   steering: Object3D
   gearSwitch: Mesh
   lightBack: Mesh

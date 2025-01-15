@@ -50,37 +50,37 @@ export const loadEngine = async (listener: AudioListener) => {
     {
       rpm: {min: 0, max: 10},
       playbackRate: {min: 0.8, max: 0.8},
-      volume: {min: 0.6, max: 1},
+      volume: {min: 0.3, max: 0.6},
     },
     {
       rpm: {min: 10, max: 1200},
       playbackRate: {min: 0.8, max: 1.2},
-      volume: {min: 0.6, max: 1},
+      volume: {min: 0.3, max: 0.6},
     },
     {
       rpm: {min: 1000, max: 2200},
       playbackRate: {min: 1, max: 1.4},
-      volume: {min: 0.6, max: 1},
+      volume: {min: 0.3, max: 0.6},
     },
     {
       rpm: {min: 2200, max: 3400},
       playbackRate: {min: 1.2, max: 1.6},
-      volume: {min: 0.6, max: 1},
+      volume: {min: 0.3, max: 0.6},
     },
     {
       rpm: {min: 3400, max: 5400},
       playbackRate: {min: 1.2, max: 1.6},
-      volume: {min: 0.8, max: 1},
+      volume: {min: 0.4, max: 0.8},
     },
     {
       rpm: {min: 5400, max: 8200},
       playbackRate: {min: 1.2, max: 1.6},
-      volume: {min: 0.8, max: 1},
+      volume: {min: 0.4, max: 0.8},
     },
     {
       rpm: {min: 8200, max: 12000},
       playbackRate: {min: 1.2, max: 1.8},
-      volume: {min: 0.8, max: 1},
+      volume: {min: 0.4, max: 0.8},
     },
   ]
 

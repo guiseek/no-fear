@@ -1,11 +1,12 @@
-import {Group, MeshStandardMaterial, Vector3} from 'three'
 import {Font, GLTF, TextGeometry} from 'three/examples/jsm/Addons.js'
+import {Group, MeshStandardMaterial, Vector3} from 'three'
 import {DEG2RAD} from 'three/src/math/MathUtils.js'
+import {getBoundingBox, getByName} from '../utils'
 import {VehiclePart} from '../interfaces'
 import {inputState} from '../infra'
-import {getBoundingBox, getByName} from '../utils'
 import {Engine} from './engine'
 import {Camera} from '../core'
+import {Sound} from './sound'
 
 export class Vehicle {
   #model: Group
@@ -18,6 +19,7 @@ export class Vehicle {
     mass: 540,
     deceleration: 24,
     tractionForceValue: 12000,
+    frictionFactorOutOfTrack: 0.99,
     airResistance: 0.015,
     rollingResistance: 12,
     brakeForce: 50000,
@@ -57,7 +59,12 @@ export class Vehicle {
 
   #lightBack: MeshStandardMaterial
 
-  constructor({scene}: GLTF, private engine: Engine, private font: Font) {
+  constructor(
+    {scene}: GLTF,
+    private engine: Engine,
+    readonly sound: Sound,
+    private font: Font
+  ) {
     this.#model = scene
 
     this.#part = {
@@ -66,7 +73,6 @@ export class Vehicle {
           left: getByName(this.model, 'WHEEL_LEFT_FRONT'),
           right: getByName(this.model, 'WHEEL_RIGHT_FRONT'),
         },
-
         hub: {
           left: getByName(this.model, 'WHEEL_LEFT_FRONT_HUB'),
           right: getByName(this.model, 'WHEEL_RIGHT_FRONT_HUB'),
@@ -80,6 +86,19 @@ export class Vehicle {
         back: {
           left: getByName(this.model, 'WHEEL_LEFT_BACK'),
           right: getByName(this.model, 'WHEEL_RIGHT_BACK'),
+        },
+      },
+      collision: {
+        body: getByName(this.model, 'COLLISION_BODY'),
+        wheel: {
+          front: {
+            left: getByName(this.model, 'COLLISION_WHEEL_FRONT_LEFT'),
+            right: getByName(this.model, 'COLLISION_WHEEL_FRONT_RIGHT'),
+          },
+          back: {
+            left: getByName(this.model, 'COLLISION_WHEEL_BACK_LEFT'),
+            right: getByName(this.model, 'COLLISION_WHEEL_BACK_RIGHT'),
+          },
         },
       },
       panel: {
@@ -103,6 +122,20 @@ export class Vehicle {
     this.part.panel.velocity.position.x = -0.055
     this.part.panel.velocity.position.y += 0.01
 
+    /**
+     * Configura o som das rodas sobre a chicane na
+     * mesma posição de sua respectiva roda
+     */
+
+    this.part.collision.body.visible = false
+    this.part.collision.wheel.front.left.visible = false
+    this.part.collision.wheel.front.right.visible = false
+    this.part.collision.wheel.back.left.visible = false
+    this.part.collision.wheel.back.right.visible = false
+
+    this.part.collision.wheel.front.left.add(this.sound.part.chicane.left)
+    this.part.collision.wheel.front.right.add(this.sound.part.chicane.right)
+
     this.#lightBack = this.#part.lightBack.material as MeshStandardMaterial
   }
 
@@ -119,6 +152,10 @@ export class Vehicle {
     this.#syncLocation(deltaTime)
     this.#syncWheels(deltaTime)
     this.#syncPanel()
+  }
+
+  applyOutOfTrackPenalty() {
+    this.#state.velocity.multiplyScalar(this.#settings.frictionFactorOutOfTrack)
   }
 
   #syncPanel() {
@@ -326,8 +363,8 @@ export class Vehicle {
   }
 }
 
-export const loadVehicle = (engine: Engine, font: Font) => {
+export const loadVehicle = (engine: Engine, sound: Sound, font: Font) => {
   return (gltf: GLTF) => {
-    return new Vehicle(gltf, engine, font)
+    return new Vehicle(gltf, engine, sound, font)
   }
 }
