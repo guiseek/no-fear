@@ -1,12 +1,3 @@
-import {
-  Engine,
-  loadEngine,
-  loadSound,
-  loadTrack,
-  loadVehicle,
-  Sound,
-  Vehicle,
-} from './entities'
 import {Camera, Input, Loader, Renderer} from './core'
 import {Font} from 'three/examples/jsm/Addons.js'
 import {Updatable} from './interfaces'
@@ -14,6 +5,15 @@ import {inputMapper} from './mappers'
 import {inputState} from './infra'
 import {control} from './config'
 import {inner} from './utils'
+import {
+  Sound,
+  Engine,
+  Vehicle,
+  loadTrack,
+  loadSound,
+  loadEngine,
+  loadVehicle,
+} from './entities'
 import {
   Mesh,
   Scene,
@@ -29,23 +29,6 @@ import {
   MeshBasicMaterial,
   EquirectangularReflectionMapping,
 } from 'three'
-
-const chicaneSound = () => {
-  const ctx = new AudioContext()
-  const osc1 = ctx.createOscillator()
-  const osc2 = ctx.createOscillator()
-  osc1.frequency.value = 500
-  osc2.frequency.value = 800
-  const gain = ctx.createGain()
-  gain.gain.value = 0
-
-  osc1.connect(gain)
-  osc2.connect(gain)
-  gain.connect(ctx.destination)
-
-  osc1.start()
-  osc2.start()
-}
 
 export class Game {
   scene = new Scene()
@@ -109,14 +92,11 @@ export class Game {
 
     const mcLaren = await this.loadMcLaren(engine, sound, font)
 
-    const track = await this.loadTrack(mcLaren)
+    const track = await this.loadTrack(mcLaren, font)
 
     this.scene.add(track.model, mcLaren.model)
 
-    track.blinkStartLight().then(() => {
-      chicaneSound()
-      console.log('brup')
-    })
+    track.blinkStartLight()
   }
 
   initialize = async () => {
@@ -128,7 +108,7 @@ export class Game {
       inputState.setButtons(mapped.buttons)
     })
 
-    addEventListener('resize', () => {
+    window.addEventListener('resize', () => {
       this.camera.aspect = inner.ratio
       this.camera.updateProjectionMatrix()
       this.renderer.setPixelRatio(devicePixelRatio)
@@ -163,10 +143,10 @@ export class Game {
   //   cancelAnimationFrame(this.#animateRef)
   // }
 
-  async loadTrack(vehicle: Vehicle) {
+  async loadTrack(vehicle: Vehicle, font: Font) {
     const track = await this.loader
       .loadGLTF('track2.glb', 'Track model')
-      .then(loadTrack(vehicle))
+      .then(loadTrack(vehicle, font))
 
     this.#updatables.add(track)
 

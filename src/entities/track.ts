@@ -1,8 +1,15 @@
-import {async, detectContact, getByName, interval} from '../utils'
+import {Group, Vector3, Raycaster, MeshStandardMaterial} from 'three'
+import {Font, GLTF, TextGeometry} from 'three/examples/jsm/Addons.js'
 import {TrackPart, Updatable} from '../interfaces'
-import {GLTF} from 'three/examples/jsm/Addons.js'
-import {Group, MeshStandardMaterial} from 'three'
 import {Vehicle} from './vehicle'
+import {
+  async,
+  interval,
+  getByName,
+  formatTime,
+  getBoundingBox,
+  detectContact,
+} from '../utils'
 
 export class Track implements Updatable {
   #model: Group
@@ -25,7 +32,14 @@ export class Track implements Updatable {
     MeshStandardMaterial
   ]
 
-  constructor({scene}: GLTF, private vehicle: Vehicle) {
+  #raycaster = new Raycaster()
+  #direction = new Vector3(0, -1, 0)
+
+  #lapStartTime?: DOMHighResTimeStamp
+  #currentLapTime?: number
+  #bestLapTime = Infinity
+
+  constructor({scene}: GLTF, private vehicle: Vehicle, private font: Font) {
     this.#model = scene
 
     this.#part = {
@@ -34,8 +48,17 @@ export class Track implements Updatable {
         grass: getByName(this.model, 'GROUND_GRASS'),
         concrete: getByName(this.model, 'GROUND_CONCRETE'),
       },
+      collision: {
+        startLap: getByName(this.model, 'START_LAP'),
+        finishLap: getByName(this.model, 'FINISH_LAP'),
+      },
+      screenTimes: {
+        lapTime: getByName(this.model, 'LAP_TIME'),
+        bestLapTime: getByName(this.model, 'BEST_LAP_TIME'),
+      },
       trackLines: getByName(this.model, 'TRACK_LINES'),
       track: getByName(this.model, 'TRACK'),
+      startLightsParent: getByName(this.model, 'START_LIGHTS_PARENT'),
       startLights: [
         getByName(this.model, 'START_LIGHT_1'),
         getByName(this.model, 'START_LIGHT_2'),
@@ -44,6 +67,9 @@ export class Track implements Updatable {
         getByName(this.model, 'START_LIGHT_5'),
       ],
     }
+
+    this.part.collision.startLap.visible = false
+    this.part.collision.finishLap.visible = false
 
     this.#startLights = [
       this.part.startLights[0].material as MeshStandardMaterial,
@@ -54,12 +80,80 @@ export class Track implements Updatable {
     ]
   }
 
+  #setLapTimes() {
+    const options = {font: this.font, size: 2, depth: 0, bevelSize: 0.01}
+
+    if (this.#currentLapTime !== undefined) {
+      const lapTime = `LAP TIME: ${formatTime(this.#currentLapTime)}`
+      const lapTimeGeometry = new TextGeometry(lapTime, options)
+      const {x, y, z} = getBoundingBox(lapTimeGeometry)
+      lapTimeGeometry.translate(-x + 9, -y, -z)
+
+      this.part.screenTimes.lapTime.geometry.dispose()
+      this.part.screenTimes.lapTime.geometry = lapTimeGeometry
+      this.part.screenTimes.lapTime.rotateX(-Math.PI / 2)
+    }
+
+    if (this.#bestLapTime !== Infinity) {
+      const bestLapTime = `BEST LAP: ${formatTime(this.#bestLapTime)}`
+      const bestLapTimeGeometry = new TextGeometry(bestLapTime, options)
+      const {x, y, z} = getBoundingBox(bestLapTimeGeometry)
+      bestLapTimeGeometry.translate(-x + 9, -y, -z)
+
+      this.part.screenTimes.bestLapTime.geometry.dispose()
+      this.part.screenTimes.bestLapTime.geometry = bestLapTimeGeometry
+      this.part.screenTimes.bestLapTime.rotateX(-Math.PI / 2)
+    }
+  }
+
+  checkStartLap(position: Vector3) {
+    this.#raycaster.set(position, this.#direction)
+
+    const intersects = this.#raycaster.intersectObject(
+      this.part.collision.startLap
+    )
+
+    if (intersects.length > 0) {
+      this.#lapStartTime = performance.now()
+    }
+  }
+
+  checkFinishLap(position: Vector3) {
+    if (!this.#lapStartTime) {
+      console.warn('Lap start time is undefined. Skipping lap detection.')
+      return
+    }
+
+    this.#raycaster.set(position, this.#direction)
+
+    const intersects = this.#raycaster.intersectObject(
+      this.part.collision.finishLap
+    )
+
+    if (intersects.length > 0) {
+      this.#currentLapTime = (performance.now() - this.#lapStartTime) / 1000
+
+      if (this.#currentLapTime < this.#bestLapTime) {
+        this.#bestLapTime = this.#currentLapTime
+      }
+
+      this.#setLapTimes()
+
+      this.#lapStartTime = undefined
+    }
+  }
+
   contactDetector(_delta: number) {
-    
     const {wheel, body} = this.vehicle.part.collision
 
-    const wheelFrontLeftOnChicanes = detectContact(wheel.front.left, this.part.chicanes.children)
-    const wheelFrontRightOnChicanes = detectContact(wheel.front.right, this.part.chicanes.children)
+    const wheelFrontLeftOnChicanes = detectContact(
+      wheel.front.left,
+      this.part.chicanes.children
+    )
+    const wheelFrontRightOnChicanes = detectContact(
+      wheel.front.right,
+      this.part.chicanes.children
+    )
 
     const {chicane} = this.vehicle.sound.part
 
@@ -99,9 +193,17 @@ export class Track implements Updatable {
 
   update(delta: number) {
     this.contactDetector(delta)
+
+    const {position} = this.vehicle.model
+
+    if (!this.#lapStartTime) {
+      this.checkStartLap(position)
+    } else {
+      this.checkFinishLap(position)
+    }
   }
 }
 
-export const loadTrack = (vehicle: Vehicle) => (gltf: GLTF) => {
-  return new Track(gltf, vehicle)
+export const loadTrack = (vehicle: Vehicle, font: Font) => (gltf: GLTF) => {
+  return new Track(gltf, vehicle, font)
 }
