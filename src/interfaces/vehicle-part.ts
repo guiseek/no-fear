@@ -24,8 +24,13 @@ export interface VehicleCollision {
   wheel: VehicleCollisionWheel
 }
 
+export interface VehicleSenna {
+  head: Object3D
+}
+
 export interface VehiclePart {
   collision: VehicleCollision
+  senna: VehicleSenna
   wheel: VehicleWheel
   steering: Object3D
   gearSwitch: Mesh

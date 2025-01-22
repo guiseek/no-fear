@@ -58,8 +58,8 @@ export class Loader {
     return this.rgbe.loadAsync(url, this.#createProgress(name))
   }
 
-  loadTexture(url: string, name: string) {
-    return this.texture.loadAsync(url, this.#createProgress(name))
+  loadTexture(url: string) {
+    return this.texture.loadAsync(url)
   }
 
   loadFont(url: string, name: string) {
@@ -84,7 +84,7 @@ export class Loader {
       const percent = (loaded / total) * 100
       text.textContent = `${name} - ${percent.toFixed()}%`
       el.value = +percent.toFixed()
-      if (el.value === 100) item.remove()
+      if (el.value > 99) item.remove()
     }
   }
 }

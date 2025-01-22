@@ -146,16 +146,22 @@ export class FirstTrack extends Track<TrackPart, TrackSound> {
       wheelFrontLeftOnChicanes.length &&
       !this.trackSound.chicane.left.isPlaying
     ) {
+      
+      
+      console.log('chicane left play');
       this.trackSound.chicane.left.play()
     } else if (this.trackSound.chicane.left.isPlaying)
+      console.log('chicane left stop');
       this.trackSound.chicane.left.stop()
-
-    if (
-      wheelFrontRightOnChicanes.length &&
-      !this.trackSound.chicane.right.isPlaying
-    ) {
-      this.trackSound.chicane.right.play()
-    } else if (this.trackSound.chicane.right.isPlaying)
+      
+      if (
+        wheelFrontRightOnChicanes.length &&
+        !this.trackSound.chicane.right.isPlaying
+      ) {
+        console.log('chicane right play');
+        this.trackSound.chicane.right.play()
+      } else if (this.trackSound.chicane.right.isPlaying)
+        console.log('chicane right stop');
       this.trackSound.chicane.right.stop()
 
     const bodyOutOfTrack = this.detectContact(body, [this.part.track])

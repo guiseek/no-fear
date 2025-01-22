@@ -20,14 +20,6 @@ export class McLarenMP4 extends Vehicle {
     maxSpeed: 360,
   }
 
-  get currentSpeed() {
-    return this.state.velocity.length()
-  }
-
-  get currentDirection() {
-    return this.state.velocity.clone().normalize()
-  }
-
   #part: VehiclePart
 
   get part() {
@@ -45,7 +37,7 @@ export class McLarenMP4 extends Vehicle {
   ) {
     super(gltf)
 
-    this.model.scale.setScalar(0.8)
+    this.model.scale.setScalar(1.5)
 
     this.#part = {
       wheel: {
@@ -81,6 +73,9 @@ export class McLarenMP4 extends Vehicle {
           },
         },
       },
+      senna: {
+        head: this.getByName('HEAD_PARENT')
+      },
       panel: {
         rpm: this.getByName('PANEL_RPM'),
         gear: this.getByName('PANEL_GEAR'),
@@ -91,6 +86,7 @@ export class McLarenMP4 extends Vehicle {
       lightBack: this.getByName('LIGHT_BACK'),
       body: this.getByName('SUSPENSION_FRONT'),
     }
+    
 
     this.part.panel.rpm.rotateX(-Math.PI / 2)
     this.part.panel.gear.rotateX(-Math.PI / 2)
@@ -161,6 +157,9 @@ export class McLarenMP4 extends Vehicle {
       this.part.panel.gear.geometry = geometry
     }
   }
+
+  acc = 0
+
   #createPanelText(value: number) {
     const font = this.font
 
@@ -276,8 +275,8 @@ export class McLarenMP4 extends Vehicle {
     /** Rotação do carro */
     const localVelocityZ = this.state.velocity.dot(forwardDirection)
 
-    const turningRadius = Math.max(8, this.state.rpm / 24)
-
+    const turningRadius = Math.max(8, this.state.rpm / 28)
+    
     this.state.angularVelocity =
       (this.state.steering * Math.abs(localVelocityZ)) / turningRadius
 
@@ -316,6 +315,8 @@ export class McLarenMP4 extends Vehicle {
     this.#part.wheel.hub.right.rotation.y = this.state.angle
 
     this.#part.steering.rotation.y = this.state.angle * 3
+
+    this.#part.senna.head.rotation.y = this.state.steering * 0.6
 
     /**
      * Sincroniza as rodas

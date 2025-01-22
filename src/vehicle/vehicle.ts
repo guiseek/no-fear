@@ -34,6 +34,14 @@ export abstract class Vehicle {
     angularVelocity: 0,
   }
 
+  get currentSpeed() {
+    return this.state.velocity.length()
+  }
+
+  get currentDirection() {
+    return this.state.velocity.clone().normalize()
+  }
+
   abstract get part(): VehiclePart
   abstract trackSound: TrackSound
 

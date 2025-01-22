@@ -50,6 +50,7 @@ export class Game {
   #running = false
 
   constructor() {
+    this.spotLight.position.x = 20
     this.pointLight.lookAt(0, 0, 0)
     this.spotLight.lookAt(0, 0, 0)
 
@@ -91,7 +92,7 @@ export class Game {
 
     const mcLaren = await this.loadMcLaren(this.action, engine, sound, font)
 
-    const track = await this.loadTrack(mcLaren, font, listener)
+    const track = await this.loadTrack(mcLaren, font, sound)
 
     this.scene.add(track.model, mcLaren.model)
 
@@ -145,9 +146,7 @@ export class Game {
     this.renderer.render(this.scene, this.camera)
   }
 
-  async loadTrack(vehicle: Vehicle, font: Font, listener: AudioListener) {
-    const trackSound = await loadTrackSound(listener)
-
+  async loadTrack(vehicle: Vehicle, font: Font, trackSound: TrackSound) {
     const track = await this.loader
       .loadGLTF('track.glb', 'Track model')
       .then(loadFirstTrack(vehicle, trackSound, font))
@@ -164,12 +163,11 @@ export class Game {
     font: Font
   ) {
     const mcLaren = await this.loader
-      .loadGLTF('mclaren.glb', 'McLaren model')
+      .loadGLTF('mc-laren-mp4.glb', 'McLaren model')
       .then(loadMcLarenMP4(action, engine, sound, font))
 
     this.#updatables.add(mcLaren)
 
-    this.camera.position.set(0, 1.2, -0.3)
     this.camera.lookAt(
       mcLaren.model.position.clone().add(new Vector3(0, -0.8, 12))
     )
@@ -198,11 +196,8 @@ export class Game {
   }
 
   async loadBackgroundEnvironment() {
-    const map = await this.loader.loadTexture(
-      'sky.jpg',
-      'Sky night texture'
-    )
-    map.repeat.set(12, 12) // Ajuste os valores para controlar a repetição (4x4 neste caso).
+    const map = await this.loader.loadTexture('sky.jpg')
+    map.repeat.set(12, 12)
     map.wrapS = RepeatWrapping
     map.wrapT = RepeatWrapping
     map.mapping = EquirectangularReflectionMapping

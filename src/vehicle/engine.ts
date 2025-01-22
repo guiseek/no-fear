@@ -25,18 +25,6 @@ export class Engine {
 
     const volume = this.#normalizeRange({min: 0.6, max: 1}, normalized)
     gear.audio.setVolume(volume)
-
-    // if (this.#gear > 0) {
-    //   this.options.gears[0].audio.setVolume(0)
-    // }
-    //  else if (rpm === 0) {
-    //   // this.options.gears.forEach((gear) => gear.audio.pause())
-
-    //   const gear = this.options.gears[0]
-    //   gear.audio.setPlaybackRate(gear.rate.min)
-    //   gear.audio.setVolume(0)
-    // } else {
-    // }
   }
 
   #determineGear(rpm: number) {
@@ -44,9 +32,7 @@ export class Engine {
 
     if (rpm > gear.rpm.max && this.#gear < this.options.gears.length - 1) {
       this.options.gears[this.#gear].audio.setVolume(0)
-
-      console.log(this.#gear++)
-
+      this.#gear++
       this.options.gears[this.#gear].audio.setVolume(0.4)
     } else if (rpm < gear.rpm.min && this.#gear > 0) {
       this.options.gears[this.#gear].audio.setVolume(0)
@@ -78,13 +64,7 @@ export const loadEngine = async (listener: AudioListener) => {
   start.setLoop(false)
   start.play()
 
-  await delay(1800)
-
-  // const idle = new Audio(listener)
-  // idle.setBuffer(await loader.loadAudio('running.wav'))
-  // idle.setVolume(0.4)
-  // idle.setLoop(true)
-  // idle.play()
+  await delay(1600)
 
   const running = new Audio(listener)
   running.setBuffer(await loader.loadAudio('running.wav'))
@@ -115,25 +95,25 @@ export const loadEngine = async (listener: AudioListener) => {
     {
       audio: running,
       rpm: {min: 2200, max: 3800},
-      rate: {min: 1, max: 1.2},
+      rate: {min: 1, max: 1.4},
     },
     // 4ª
     {
       audio: running,
-      rpm: {min: 3800, max: 6000},
+      rpm: {min: 3800, max: 5600},
       rate: {min: 1, max: 1.4},
     },
     // 5ª
     {
       audio: running,
-      rpm: {min: 6000, max: 9000},
-      rate: {min: 1.2, max: 1.4},
+      rpm: {min: 5600, max: 9000},
+      rate: {min: 1, max: 1.4},
     },
     // 6ª
     {
       audio: running,
       rpm: {min: 9000, max: 12000},
-      rate: {min: 1.2, max: 1.6},
+      rate: {min: 1, max: 1.6},
     },
   ]
 
