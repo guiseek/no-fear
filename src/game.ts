@@ -1,19 +1,12 @@
-import {Camera, Input, Loader, Renderer} from './core'
+import {Engine, loadEngine, loadMcLarenMP4, Vehicle} from './vehicle'
+import {loadFirstTrack, loadTrackSound, TrackSound} from './tracks'
+import {Camera, Input, Loader, Renderer, use} from './core'
 import {Font} from 'three/examples/jsm/Addons.js'
 import {Updatable} from './interfaces'
 import {inputMapper} from './mappers'
-import {inputState} from './infra'
 import {control} from './config'
+import {Action} from './states'
 import {inner} from './utils'
-import {
-  Sound,
-  Engine,
-  Vehicle,
-  loadTrack,
-  loadSound,
-  loadEngine,
-  loadVehicle,
-} from './entities'
 import {
   Mesh,
   Scene,
@@ -24,6 +17,7 @@ import {
   PointLight,
   AudioListener,
   SphereGeometry,
+  RepeatWrapping,
   HemisphereLight,
   DirectionalLight,
   MeshBasicMaterial,
@@ -33,26 +27,27 @@ import {
 export class Game {
   scene = new Scene()
   clock = new Clock()
-
   camera = new Camera()
-
   renderer = new Renderer(app)
-
   pointLight = new PointLight(0xffffff, 1, 10)
   dirLight = new DirectionalLight(0xffffff, 1)
   hemiLight = new HemisphereLight(0xffffff, 1)
   spotLight = new SpotLight(0xffffff, 1, 10, 1)
 
-  #sky!: Mesh
+  #sky?: Mesh
 
   input = Input.getInstance()
   loader = Loader.getInstance()
 
-  #started = false
-
   #updatables = new Set<Updatable>()
 
-  // #animateRef = -1
+  #started = false
+
+  #paused = false
+
+  action = use(Action)
+
+  #running = false
 
   constructor() {
     this.pointLight.lookAt(0, 0, 0)
@@ -78,25 +73,31 @@ export class Game {
     })
   }
 
+  pause() {
+    this.#paused = !this.#paused
+  }
+
   async loadAll() {
     await this.loadBackgroundEnvironment()
 
     const listener = new AudioListener()
     this.camera.add(listener)
 
-    const engine = await this.loadEngine(listener)
+    const engine = await loadEngine(listener)
 
-    const sound = await this.loadSound(listener)
+    const sound = await loadTrackSound(listener)
 
     const font = await this.loadFont()
 
-    const mcLaren = await this.loadMcLaren(engine, sound, font)
+    const mcLaren = await this.loadMcLaren(this.action, engine, sound, font)
 
-    const track = await this.loadTrack(mcLaren, font)
+    const track = await this.loadTrack(mcLaren, font, listener)
 
     this.scene.add(track.model, mcLaren.model)
 
-    track.blinkStartLight()
+    track.blinkStartLight().then(() => {
+      this.#running = true
+    })
   }
 
   initialize = async () => {
@@ -104,8 +105,8 @@ export class Game {
 
     this.input.on('update', async (state) => {
       const mapped = inputMapper.fromKeyboard(state)
-      inputState.setDirections(mapped.directions)
-      inputState.setButtons(mapped.buttons)
+      this.action.setAxis(mapped.directions)
+      this.action.setButton(mapped.buttons)
     })
 
     window.addEventListener('resize', () => {
@@ -119,8 +120,8 @@ export class Game {
       control.onGamepad = (_, gamepad) => {
         if (gamepad) {
           const mapped = inputMapper.fromGamepad(gamepad)
-          inputState.setDirections(mapped.directions)
-          inputState.setButtons(mapped.buttons)
+          this.action.setAxis(mapped.directions)
+          this.action.setButton(mapped.buttons)
         }
       }
 
@@ -129,34 +130,42 @@ export class Game {
   }
 
   #animate = () => {
+    requestAnimationFrame(this.#animate)
+
+    if (this.#paused) return
+
     const delta = this.clock.getDelta()
 
-    for (const updatable of this.#updatables) {
-      updatable.update(delta)
+    if (this.#running) {
+      for (const updatable of this.#updatables) {
+        updatable.update(delta)
+      }
     }
 
     this.renderer.render(this.scene, this.camera)
-    requestAnimationFrame(this.#animate)
   }
 
-  // #cancelAnimation = () => {
-  //   cancelAnimationFrame(this.#animateRef)
-  // }
+  async loadTrack(vehicle: Vehicle, font: Font, listener: AudioListener) {
+    const trackSound = await loadTrackSound(listener)
 
-  async loadTrack(vehicle: Vehicle, font: Font) {
     const track = await this.loader
-      .loadGLTF('track2.glb', 'Track model')
-      .then(loadTrack(vehicle, font))
+      .loadGLTF('track.glb', 'Track model')
+      .then(loadFirstTrack(vehicle, trackSound, font))
 
     this.#updatables.add(track)
 
     return track
   }
 
-  async loadMcLaren(engine: Engine, sound: Sound, font: Font) {
+  async loadMcLaren(
+    action: Action,
+    engine: Engine,
+    sound: TrackSound,
+    font: Font
+  ) {
     const mcLaren = await this.loader
       .loadGLTF('mclaren.glb', 'McLaren model')
-      .then(loadVehicle(engine, sound, font))
+      .then(loadMcLarenMP4(action, engine, sound, font))
 
     this.#updatables.add(mcLaren)
 
@@ -165,7 +174,7 @@ export class Game {
       mcLaren.model.position.clone().add(new Vector3(0, -0.8, 12))
     )
 
-    mcLaren.addCamera(this.camera)
+    mcLaren.model.add(this.camera)
 
     mcLaren.model.position.set(0, 0, 1)
     mcLaren.model.rotation.set(0, -1.6, 0)
@@ -188,27 +197,20 @@ export class Game {
     )
   }
 
-  async loadEngine(listener: AudioListener) {
-    return loadEngine(listener)
-  }
-
-  async loadSound(listener: AudioListener) {
-    return loadSound(listener)
-  }
-
   async loadBackgroundEnvironment() {
-    const map = await this.loader.loadEnv(
-      'puresky_quarry_2k.hdr',
-      'Sky environment scene'
+    const map = await this.loader.loadTexture(
+      'sky.jpg',
+      'Sky night texture'
     )
-
+    map.repeat.set(12, 12) // Ajuste os valores para controlar a repetição (4x4 neste caso).
+    map.wrapS = RepeatWrapping
+    map.wrapT = RepeatWrapping
     map.mapping = EquirectangularReflectionMapping
 
     const side = BackSide
-    const geometry = new SphereGeometry(5000, 60, 60)
-    const material = new MeshBasicMaterial({map, side})
+    const geometry = new SphereGeometry(6000, 60, 60)
+    const material = new MeshBasicMaterial({map, side, color: 0x333333})
     this.#sky = new Mesh(geometry, material)
-
     this.scene.add(this.#sky)
   }
 }

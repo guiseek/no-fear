@@ -1,5 +1,6 @@
 export * from './async';
 export * from './create';
+export * from './delay';
 export * from './detect-contact';
 export * from './detect-device';
 export * from './entries';

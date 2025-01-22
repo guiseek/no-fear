@@ -1,5 +1,5 @@
+import {Action} from './states'
 import {
-  add,
   set,
   use,
   Axes,
@@ -10,12 +10,11 @@ import {
   GamepadControl,
 } from './core'
 
-add({
-  for: Control,
-  use: GamepadControl,
-})
-
 set(
+  {
+    for: Control,
+    use: GamepadControl,
+  },
   {
     for: Control,
     use: GamepadControl,
@@ -27,6 +26,9 @@ set(
   {
     for: Buttons,
     use: GamepadButtons,
+  },
+  {
+    for: Action,
   }
 )
 

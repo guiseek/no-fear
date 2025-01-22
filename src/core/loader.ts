@@ -1,4 +1,4 @@
-import {AudioLoader} from 'three'
+import {AudioLoader, TextureLoader} from 'three'
 import {create} from '../utils'
 import {
   DRACOLoader,
@@ -13,6 +13,8 @@ export class Loader {
   gltf: GLTFLoader
 
   rgbe: RGBELoader
+
+  texture: TextureLoader
 
   audio: AudioLoader
 
@@ -29,6 +31,9 @@ export class Loader {
   private constructor() {
     this.rgbe = new RGBELoader()
     this.rgbe.setPath('envs/')
+
+    this.texture = new TextureLoader()
+    this.texture.setPath('textures/')
 
     this.audio = new AudioLoader()
     this.audio.setPath('sounds/')
@@ -53,15 +58,23 @@ export class Loader {
     return this.rgbe.loadAsync(url, this.#createProgress(name))
   }
 
+  loadTexture(url: string, name: string) {
+    return this.texture.loadAsync(url, this.#createProgress(name))
+  }
+
   loadFont(url: string, name: string) {
     return this.font.loadAsync(url, this.#createProgress(name))
   }
 
-  loadAudio(url: string, name: string) {
+  loadAudio(url: string, name = url) {
     return this.audio.loadAsync(url, this.#createProgress(name))
   }
 
+  static counter: string[] = []
+
   #createProgress(name: string) {
+    Loader.counter.push(name)
+
     const el = create('progress', {max: 100, value: 0})
     const text = new Text(`${name} - 0%`)
     const item = create('li', {}, el, text)

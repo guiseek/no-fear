@@ -4,6 +4,7 @@ export * from './mobile';
 export * from './camera';
 export * from './collision';
 export * from './controls';
+export * from './entity';
 export * from './input';
 export * from './loader';
 export * from './renderer';

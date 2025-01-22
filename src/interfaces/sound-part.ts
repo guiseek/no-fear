@@ -1,4 +1,4 @@
-import {PositionalAudio} from 'three'
+import {Audio, PositionalAudio} from 'three'
 
 export interface SoundChicaneContact {
   left: PositionalAudio
@@ -7,4 +7,5 @@ export interface SoundChicaneContact {
 
 export interface SoundPart {
   chicane: SoundChicaneContact
+  startLights: Audio
 }
