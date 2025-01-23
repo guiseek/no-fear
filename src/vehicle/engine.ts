@@ -23,7 +23,7 @@ export class Engine {
     gear.audio.setPlaybackRate(playbackRate)
     gear.audio.setDetune(playbackRate * 100 * -1)
 
-    const volume = this.#normalizeRange({min: 0.6, max: 1}, normalized)
+    const volume = this.#normalizeRange({min: 0.4, max: 1}, normalized)
     gear.audio.setVolume(volume)
   }
 
@@ -33,11 +33,11 @@ export class Engine {
     if (rpm > gear.rpm.max && this.#gear < this.options.gears.length - 1) {
       this.options.gears[this.#gear].audio.setVolume(0)
       this.#gear++
-      this.options.gears[this.#gear].audio.setVolume(0.4)
+      this.options.gears[this.#gear].audio.setVolume(0.2)
     } else if (rpm < gear.rpm.min && this.#gear > 0) {
       this.options.gears[this.#gear].audio.setVolume(0)
       this.#gear--
-      this.options.gears[this.#gear].audio.setVolume(0.4)
+      this.options.gears[this.#gear].audio.setVolume(0.2)
     }
   }
 

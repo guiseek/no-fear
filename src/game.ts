@@ -1,18 +1,13 @@
-import {FirstTrack, loadFirstTrack, loadTrackSound, TrackSound} from './tracks'
+import {FirstTrack, loadFirstTrack, TrackSound} from './tracks'
 import {Camera, Input, Loader, Renderer, use} from './core'
+import {Engine, Vehicle, McLarenMP4} from './vehicle'
 import {GearConfig, Updatable} from './interfaces'
 import {Font} from 'three/examples/jsm/Addons.js'
+import {createLoadQueue} from './factories'
 import {Action, State} from './states'
 import {inputMapper} from './mappers'
 import {delay, inner} from './utils'
 import {control} from './config'
-import {
-  Engine,
-  Vehicle,
-  loadEngine,
-  McLarenMP4,
-  loadMcLarenMP4,
-} from './vehicle'
 import {
   Mesh,
   Scene,
@@ -30,7 +25,6 @@ import {
   MeshBasicMaterial,
   EquirectangularReflectionMapping,
 } from 'three'
-import {createLoadQueue} from './factories'
 
 export class Game {
   scene = new Scene()
@@ -83,13 +77,15 @@ export class Game {
         ['start-light.wav', 'Start light'],
         ['start.wav', 'Start sound'],
         ['running.wav', 'Running sound'],
+        ['checkpoint.wav', 'Checkpoint sound'],
       ],
       font: [['seven-segment-regular.typeface.json', 'Seven segment font']],
       texture: [['afternoon_sky.jpeg']],
     })
 
     const [mcLarenModel, trackModel] = resources.gltf
-    const [chicane, startLight, startBuffer, runningBuffer] = resources.audio
+    const [chicane, startLight, startBuffer, runningBuffer, checkpoint] =
+      resources.audio
 
     const [sevenSegment] = resources.font
     const [map] = resources.texture
@@ -107,7 +103,7 @@ export class Game {
 
         const side = BackSide
         const geometry = new SphereGeometry(6000, 60, 60)
-        const material = new MeshBasicMaterial({ map, side })
+        const material = new MeshBasicMaterial({map, side})
         this.#sky = new Mesh(geometry, material)
         this.scene.add(this.#sky)
 
@@ -176,7 +172,11 @@ export class Game {
 
           const engine = new Engine({start, gears})
 
-          const trackSound = new TrackSound(listener, {chicane, startLight})
+          const trackSound = new TrackSound(listener, {
+            chicane,
+            startLight,
+            checkpoint,
+          })
 
           /**
            * McLaren
@@ -254,58 +254,6 @@ export class Game {
     })
   }
 
-  async loadAll() {
-    await this.loadBackgroundEnvironment()
-
-    const listener = new AudioListener()
-    this.camera.add(listener)
-
-    const engine = await loadEngine(listener)
-
-    const sound = await loadTrackSound(listener)
-
-    const font = await this.loadFont()
-
-    const mcLaren = await this.loadMcLaren(this.action, engine, sound, font)
-
-    const track = await this.loadTrack(mcLaren, font, sound)
-
-    this.scene.add(track.model, mcLaren.model)
-
-    track.blinkStartLight().then(() => {
-      this.#running = true
-    })
-  }
-
-  initialize = async () => {
-    this.#animate()
-
-    this.input.on('update', async (state) => {
-      const mapped = inputMapper.fromKeyboard(state)
-      this.action.setAxis(mapped.directions)
-      this.action.setButton(mapped.buttons)
-    })
-
-    window.addEventListener('resize', () => {
-      this.camera.aspect = inner.ratio
-      this.camera.updateProjectionMatrix()
-      this.renderer.setPixelRatio(devicePixelRatio)
-      this.renderer.setSize(inner.width, inner.height)
-    })
-
-    addEventListener('gamepadconnected', async () => {
-      control.onGamepad = (_, gamepad) => {
-        if (gamepad) {
-          const mapped = inputMapper.fromGamepad(gamepad)
-          this.action.setAxis(mapped.directions)
-          this.action.setButton(mapped.buttons)
-        }
-      }
-
-      control.run()
-    })
-  }
-
   #animate = () => {
     requestAnimationFrame(this.#animate)
 
@@ -330,53 +278,5 @@ export class Game {
     this.#updatables.add(track)
 
     return track
-  }
-
-  async loadMcLaren(
-    action: Action,
-    engine: Engine,
-    sound: TrackSound,
-    font: Font
-  ) {
-    const mcLaren = await this.loader
-      .loadGLTF('mc-laren-mp4.glb', 'McLaren model')
-      .then(loadMcLarenMP4(action, engine, sound, font))
-
-    this.#updatables.add(mcLaren)
-
-    this.camera.lookAt(
-      mcLaren.model.position.clone().add(new Vector3(0, -0.8, 12))
-    )
-
-    mcLaren.model.add(this.camera)
-
-    this.state.on('restart', () => {
-      if (this.state.started) {
-        mcLaren.reset()
-      }
-    })
-
-    return mcLaren
-  }
-
-  async loadFont() {
-    return this.loader.loadFont(
-      'seven-segment-regular.typeface.json',
-      'Seven segment font'
-    )
-  }
-
-  async loadBackgroundEnvironment() {
-    const map = await this.loader.loadTexture('sky.jpg')
-    map.repeat.set(12, 12)
-    map.wrapS = RepeatWrapping
-    map.wrapT = RepeatWrapping
-    map.mapping = EquirectangularReflectionMapping
-
-    const side = BackSide
-    const geometry = new SphereGeometry(6000, 60, 60)
-    const material = new MeshBasicMaterial({map, side, color: 0x333333})
-    this.#sky = new Mesh(geometry, material)
-    this.scene.add(this.#sky)
   }
 }

@@ -1,3 +1,3 @@
-export * from './first-track';
+export * from './first-track/index';
 export * from './track-sound';
 export * from './track';

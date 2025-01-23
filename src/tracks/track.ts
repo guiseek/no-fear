@@ -19,6 +19,8 @@ export abstract class Track<
 
   abstract trackSound: S
 
+  abstract checkpointCompleted: Set<string>
+
   constructor(gltf: GLTF, protected vehicle: Vehicle) {
     super(gltf)
   }

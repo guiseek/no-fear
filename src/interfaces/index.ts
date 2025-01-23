@@ -8,7 +8,6 @@ export * from './range-value';
 export * from './sound-part';
 export * from './track-buffer-map';
 export * from './track-part-map';
-export * from './track-part';
 export * from './track-sound-map';
 export * from './two-sides';
 export * from './type';

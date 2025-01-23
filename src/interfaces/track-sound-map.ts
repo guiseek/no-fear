@@ -8,4 +8,5 @@ export interface TrackSoundChicane {
 export interface TrackSoundMap {
   startLight: Audio
   chicane: TrackSoundChicane
+  checkpoint: Audio
 }
