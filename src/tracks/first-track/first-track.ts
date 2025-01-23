@@ -152,6 +152,10 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
 
       if (this.currentLapTime < this.bestLapTime) {
         this.bestLapTime = this.currentLapTime
+        this.trackSound.bestLapTime.play()
+      } else {
+        this.trackSound.lapTime.play()
+
       }
 
       this.#setLapTimes()

@@ -78,14 +78,23 @@ export class Game {
         ['start.wav', 'Start sound'],
         ['running.wav', 'Running sound'],
         ['checkpoint.wav', 'Checkpoint sound'],
+        ['lap-time.wav', 'Lap time sound'],
+        ['best-lap-time.wav', 'Best lap time sound'],
       ],
       font: [['seven-segment-regular.typeface.json', 'Seven segment font']],
       texture: [['afternoon_sky.jpeg']],
     })
 
     const [mcLarenModel, trackModel] = resources.gltf
-    const [chicane, startLight, startBuffer, runningBuffer, checkpoint] =
-      resources.audio
+    const [
+      chicane,
+      startLight,
+      startBuffer,
+      runningBuffer,
+      checkpoint,
+      lapTime,
+      bestLapTime,
+    ] = resources.audio
 
     const [sevenSegment] = resources.font
     const [map] = resources.texture
@@ -176,6 +185,8 @@ export class Game {
             chicane,
             startLight,
             checkpoint,
+            lapTime,
+            bestLapTime,
           })
 
           /**
