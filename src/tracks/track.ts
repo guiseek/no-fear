@@ -8,12 +8,6 @@ export abstract class Track<
   P extends TrackPartMap,
   S extends TrackSoundMap
 > extends Entity {
-  #model: Object3D
-
-  get model() {
-    return this.#model
-  }
-
   protected raycaster = new Raycaster()
   protected direction = new Vector3(0, -1, 0)
 
@@ -25,9 +19,8 @@ export abstract class Track<
 
   abstract trackSound: S
 
-  constructor({scene}: GLTF, protected vehicle: Vehicle) {
-    super()
-    this.#model = scene
+  constructor(gltf: GLTF, protected vehicle: Vehicle) {
+    super(gltf)
   }
 
   abstract checkStartLap(position: Vector3Like): void

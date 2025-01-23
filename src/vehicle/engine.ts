@@ -77,7 +77,7 @@ export const loadEngine = async (listener: AudioListener) => {
     {
       audio: running,
       rpm: {min: 0, max: 10},
-      rate: {min: 1, max: 1},
+      rate: {min: 0.8, max: 0.9},
     },
     // 1ª
     {
@@ -94,25 +94,25 @@ export const loadEngine = async (listener: AudioListener) => {
     // 3ª
     {
       audio: running,
-      rpm: {min: 2200, max: 3800},
+      rpm: {min: 2200, max: 3600},
       rate: {min: 1, max: 1.4},
     },
     // 4ª
     {
       audio: running,
-      rpm: {min: 3800, max: 5600},
+      rpm: {min: 3600, max: 5200},
       rate: {min: 1, max: 1.4},
     },
     // 5ª
     {
       audio: running,
-      rpm: {min: 5600, max: 9000},
+      rpm: {min: 5200, max: 7500},
       rate: {min: 1, max: 1.4},
     },
     // 6ª
     {
       audio: running,
-      rpm: {min: 9000, max: 12000},
+      rpm: {min: 7500, max: 12000},
       rate: {min: 1, max: 1.6},
     },
   ]

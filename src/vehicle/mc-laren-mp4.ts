@@ -38,6 +38,7 @@ export class McLarenMP4 extends Vehicle {
     super(gltf)
 
     this.model.scale.setScalar(1.5)
+    this.model.rotation.set(0, -1.6, 0)
 
     this.#part = {
       wheel: {
@@ -74,7 +75,7 @@ export class McLarenMP4 extends Vehicle {
         },
       },
       senna: {
-        head: this.getByName('HEAD_PARENT')
+        head: this.getByName('HEAD_PARENT'),
       },
       panel: {
         rpm: this.getByName('PANEL_RPM'),
@@ -86,7 +87,6 @@ export class McLarenMP4 extends Vehicle {
       lightBack: this.getByName('LIGHT_BACK'),
       body: this.getByName('SUSPENSION_FRONT'),
     }
-    
 
     this.part.panel.rpm.rotateX(-Math.PI / 2)
     this.part.panel.gear.rotateX(-Math.PI / 2)
@@ -119,7 +119,24 @@ export class McLarenMP4 extends Vehicle {
     this.state.velocity.set(0, 0, 0)
   }
 
-  reset() {}
+  reset() {
+    this.settings = {
+      mass: 540,
+      deceleration: 24,
+      tractionForceValue: 12000,
+      frictionFactorOutOfTrack: 0.99,
+      airResistance: 0.015,
+      rollingResistance: 12,
+      brakeForce: 50000,
+      lateralFriction: 0.7,
+      maxSpeed: 360,
+    }
+
+    this.resetState()
+
+    this.model.rotation.set(0, -1.6, 0)
+    this.model.position.set(0, 0, 0)
+  }
 
   update(deltaTime: number) {
     this.engine.update(this.state.rpm)
@@ -276,7 +293,7 @@ export class McLarenMP4 extends Vehicle {
     const localVelocityZ = this.state.velocity.dot(forwardDirection)
 
     const turningRadius = Math.max(8, this.state.rpm / 28)
-    
+
     this.state.angularVelocity =
       (this.state.steering * Math.abs(localVelocityZ)) / turningRadius
 
@@ -316,7 +333,7 @@ export class McLarenMP4 extends Vehicle {
 
     this.#part.steering.rotation.y = this.state.angle * 3
 
-    this.#part.senna.head.rotation.y = this.state.steering * 0.6
+    this.#part.senna.head.rotation.y = this.state.steering * 0.3
 
     /**
      * Sincroniza as rodas
@@ -329,7 +346,8 @@ export class McLarenMP4 extends Vehicle {
         Math.cos(this.model.rotation.y)
       )
     )
-    const wheelRotation = (localVelocityZ / wheelRadius) * (deltaTime * wheelRadius)
+    const wheelRotation =
+      (localVelocityZ / wheelRadius) * (deltaTime * wheelRadius)
 
     this.#part.wheel.front.left.rotation.x += wheelRotation
     this.#part.wheel.front.right.rotation.x += wheelRotation

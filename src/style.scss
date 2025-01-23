@@ -33,18 +33,21 @@ body {
 }
 
 #progress {
-  position: fixed;
-  left: 20px;
-  bottom: 80px;
-  list-style: none;
+  gap: 20px;
   margin: 0;
-
+  padding: 0;
+  left: 20px;
+  bottom: 70px;
+  position: fixed;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
   li {
-    display: flex;
-    flex-direction: column;
-    color: white;
     margin: 0;
     padding: 0;
+    color: white;
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -67,9 +70,13 @@ body {
   }
 }
 
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
 #instructions {
   left: 20px;
-  bottom: 20px;
+  top: 20px;
   position: fixed;
   z-index: 100;
 

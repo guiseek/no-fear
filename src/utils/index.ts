@@ -9,6 +9,7 @@ export * from './format-time';
 export * from './get-bounding-box';
 export * from './get-bounds';
 export * from './get-by-name';
+export * from './html';
 export * from './inner';
 export * from './interval';
 export * from './normalize-key';

@@ -1,7 +1,16 @@
 import {BufferGeometry, Object3D} from 'three'
+import {GLTF} from 'three/examples/jsm/Addons.js'
 
 export abstract class Entity {
-  abstract get model(): Object3D
+  #model: Object3D
+
+  get model() {
+    return this.#model
+  }
+
+  constructor({scene}: GLTF) {
+    this.#model = scene
+  }
 
   abstract update(delta: number): void
 
@@ -17,6 +26,16 @@ export abstract class Entity {
       y: (geometry.boundingBox.max.y - geometry.boundingBox.min.y) / 2,
       z: (geometry.boundingBox.max.z - geometry.boundingBox.min.z) / 2,
     }
+  }
+
+  protected getBoundingSphere(geometry: BufferGeometry) {
+    geometry.computeBoundingSphere()
+
+    if (!geometry.boundingSphere) {
+      throw `Geometry haven't boundingSphere`
+    }
+
+    return geometry.boundingSphere
   }
 
   protected getByName<R extends Object3D>(name: string) {

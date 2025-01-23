@@ -53,6 +53,20 @@ export abstract class Vehicle {
     this.state.velocity.multiplyScalar(this.settings.frictionFactorOutOfTrack)
   }
 
+  protected resetState() {
+    this.state = {
+      rpm: 0,
+      angle: 0,
+      steering: 0,
+      velocity: new Vector3(0, 0, 0),
+      acceleration: new Vector3(),
+      netForce: new Vector3(),
+      tractionForce: new Vector3(),
+      resistanceForce: new Vector3(),
+      angularVelocity: 0,
+    }
+  }
+
   protected getBoundingBox(geometry: BufferGeometry) {
     geometry.computeBoundingBox()
 

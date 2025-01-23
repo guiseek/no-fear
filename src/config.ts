@@ -1,4 +1,4 @@
-import {Action} from './states'
+import {Action, State} from './states'
 import {
   set,
   use,
@@ -29,6 +29,9 @@ set(
   },
   {
     for: Action,
+  },
+  {
+    for: State,
   }
 )
 
