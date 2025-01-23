@@ -1,8 +1,7 @@
-import {FirstTrack, loadFirstTrack, TrackSound} from './tracks'
 import {Camera, Input, Loader, Renderer, use} from './core'
-import {Engine, Vehicle, McLarenMP4} from './vehicle'
 import {GearConfig, Updatable} from './interfaces'
-import {Font} from 'three/examples/jsm/Addons.js'
+import {FirstTrack, TrackSound} from './tracks'
+import {Engine, McLarenMP4} from './vehicle'
 import {createLoadQueue} from './factories'
 import {Action, State} from './states'
 import {inputMapper} from './mappers'
@@ -80,6 +79,7 @@ export class Game {
         ['checkpoint.wav', 'Checkpoint sound'],
         ['lap-time.wav', 'Lap time sound'],
         ['best-lap-time.wav', 'Best lap time sound'],
+        ['victory-theme.ogg', 'Victory theme sound'],
       ],
       font: [['seven-segment-regular.typeface.json', 'Seven segment font']],
       texture: [['afternoon_sky.jpeg']],
@@ -94,12 +94,11 @@ export class Game {
       checkpoint,
       lapTime,
       bestLapTime,
+      victoryTheme,
     ] = resources.audio
 
     const [sevenSegment] = resources.font
     const [map] = resources.texture
-
-    console.log(resources)
 
     this.state.on('start', async () => {
       if (!this.state.started) {
@@ -187,6 +186,7 @@ export class Game {
             checkpoint,
             lapTime,
             bestLapTime,
+            victoryTheme,
           })
 
           /**
@@ -279,15 +279,5 @@ export class Game {
     }
 
     this.renderer.render(this.scene, this.camera)
-  }
-
-  async loadTrack(vehicle: Vehicle, font: Font, trackSound: TrackSound) {
-    const track = await this.loader
-      .loadGLTF('track.glb', 'Track model')
-      .then(loadFirstTrack(vehicle, trackSound, font))
-
-    this.#updatables.add(track)
-
-    return track
   }
 }

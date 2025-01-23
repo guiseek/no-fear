@@ -12,4 +12,4 @@ export * from './track-sound-map';
 export * from './two-sides';
 export * from './type';
 export * from './updatable';
-export * from './vehicle-part';
+export * from './vehicle-part-map';

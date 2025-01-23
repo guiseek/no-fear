@@ -4,4 +4,5 @@ export interface TrackBufferMap {
   chicane: AudioBuffer
   lapTime: AudioBuffer
   bestLapTime: AudioBuffer
+  victoryTheme: AudioBuffer
 }

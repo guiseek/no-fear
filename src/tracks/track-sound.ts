@@ -10,6 +10,8 @@ export class TrackSound implements TrackSoundMap {
 
   bestLapTime: Audio
 
+  victoryTheme: Audio
+
   chicane: TrackSoundChicane
 
   constructor(listener: AudioListener, buffer: TrackBufferMap) {
@@ -24,6 +26,10 @@ export class TrackSound implements TrackSoundMap {
 
     this.bestLapTime = new Audio(listener)
     this.bestLapTime.setBuffer(buffer.bestLapTime)
+    this.lapTime.setBuffer(buffer.lapTime)
+
+    this.victoryTheme = new Audio(listener)
+    this.victoryTheme.setBuffer(buffer.victoryTheme)
 
     this.chicane = {
       left: new PositionalAudio(listener),

@@ -1,9 +1,9 @@
 import {BufferGeometry, Object3D, Vector3} from 'three'
 import {GLTF} from 'three/examples/jsm/Addons.js'
-import {VehiclePart} from '../interfaces'
+import {VehiclePartMap} from '../interfaces'
 import {TrackSound} from '../tracks'
 
-export abstract class Vehicle {
+export abstract class Vehicle<P extends VehiclePartMap> {
   #model: Object3D
 
   get model() {
@@ -42,8 +42,10 @@ export abstract class Vehicle {
     return this.state.velocity.clone().normalize()
   }
 
-  abstract get part(): VehiclePart
+  abstract get part(): P
   abstract trackSound: TrackSound
+
+  abstract celebrate(): void
 
   constructor({scene}: GLTF) {
     this.#model = scene

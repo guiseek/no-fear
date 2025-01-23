@@ -11,4 +11,5 @@ export interface TrackSoundMap {
   checkpoint: Audio
   lapTime: Audio
   bestLapTime: Audio
+  victoryTheme: Audio
 }

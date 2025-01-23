@@ -1,5 +1,5 @@
+import {TrackPartMap, TrackSoundMap, VehiclePartMap} from '../interfaces'
 import {Object3D, Raycaster, Vector3, Vector3Like} from 'three'
-import {TrackPartMap, TrackSoundMap} from '../interfaces'
 import {GLTF} from 'three/examples/jsm/Addons.js'
 import {Vehicle} from '../vehicle'
 import {Entity} from '../core'
@@ -21,7 +21,7 @@ export abstract class Track<
 
   abstract checkpointCompleted: Set<string>
 
-  constructor(gltf: GLTF, protected vehicle: Vehicle) {
+  constructor(gltf: GLTF, protected vehicle: Vehicle<VehiclePartMap>) {
     super(gltf)
   }
 

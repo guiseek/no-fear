@@ -3,6 +3,7 @@ import {FirstTrackPartMap} from './first-track-part-map'
 import {async, formatTime, interval} from '../../utils'
 import {MeshStandardMaterial, Vector3} from 'three'
 import {FirstTrackPart} from './first-track-part'
+import {VehiclePartMap} from '../../interfaces'
 import {TrackSound} from '../track-sound'
 import {Vehicle} from '../../vehicle'
 import {Track} from '../track'
@@ -28,7 +29,7 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
 
   constructor(
     gltf: GLTF,
-    vehicle: Vehicle,
+    vehicle: Vehicle<VehiclePartMap>,
     readonly trackSound: TrackSound,
     private font: Font
   ) {
@@ -152,13 +153,15 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
 
       if (this.currentLapTime < this.bestLapTime) {
         this.bestLapTime = this.currentLapTime
-        this.trackSound.bestLapTime.play()
+        this.trackSound.victoryTheme.play()
+        this.vehicle.celebrate()
       } else {
-        this.trackSound.lapTime.play()
-
+        this.trackSound.victoryTheme.play()
       }
 
       this.#setLapTimes()
+
+      this.checkpointCompleted.clear()
 
       this.lapStartTime = undefined
     }
@@ -182,7 +185,7 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
     ) {
       this.trackSound.chicane.left.play()
     } else if (this.trackSound.chicane.left.isPlaying)
-    this.trackSound.chicane.left.stop()
+      this.trackSound.chicane.left.stop()
 
     if (
       wheelFrontRightOnChicanes.length &&
@@ -190,7 +193,7 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
     ) {
       this.trackSound.chicane.right.play()
     } else if (this.trackSound.chicane.right.isPlaying)
-    this.trackSound.chicane.right.stop()
+      this.trackSound.chicane.right.stop()
 
     const bodyOutOfTrack = this.detectContact(body, [this.part.track])
 
@@ -234,7 +237,7 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
 }
 
 export const loadFirstTrack = (
-  vehicle: Vehicle,
+  vehicle: Vehicle<VehiclePartMap>,
   trackSound: TrackSound,
   font: Font
 ) => {
