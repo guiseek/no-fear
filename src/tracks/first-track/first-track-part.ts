@@ -8,6 +8,7 @@ export const enum FirstTrackPart {
   ScreenLapTime = `LAP_TIME`,
   ScreenBestLapTime = `BEST_LAP_TIME`,
   TrackLines = `TRACK_LINES`,
+  TrackBoxes = `TRACK_BOXES`,
   Track = `TRACK`,
   StartLightsParent = `START_LIGHTS_PARENT`,
   StartLight1 = `START_LIGHT_1`,

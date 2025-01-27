@@ -18,6 +18,7 @@ export interface FirstTrackScreen {
 export interface FirstTrackPartMap extends TrackPartMap {
   track: Mesh
   trackLines: Mesh
+  trackBoxes: Mesh
   screenTimes: FirstTrackScreen
   chicanes: FirstTrackChicanes
   ground: FirstTrackGround

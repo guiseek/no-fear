@@ -52,6 +52,7 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
         bestLapTime: this.getByName(FirstTrackPart.ScreenBestLapTime),
       },
       trackLines: this.getByName(FirstTrackPart.TrackLines),
+      trackBoxes: this.getByName(FirstTrackPart.TrackBoxes),
       track: this.getByName(FirstTrackPart.Track),
       startLightsParent: this.getByName(FirstTrackPart.StartLightsParent),
       startLights: [
@@ -157,10 +158,7 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
       false
     )
 
-    if (
-      this.state.currentLap < this.settings.laps &&
-      intersects.length > 0
-    ) {
+    if (this.state.currentLap < this.settings.laps && intersects.length > 0) {
       this.state.currentLap += 1
       this.state.checkpointCompleted.clear()
     }
@@ -210,10 +208,28 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
     } else if (this.vehicle.vehicleSound.chicane.right.isPlaying)
       this.vehicle.vehicleSound.chicane.right.stop()
 
-    const bodyOutOfTrack = this.detectContact(body, [this.part.track])
+    const bodyOutOfTrack = this.detectContact(body, [
+      this.part.track,
+      this.part.trackBoxes,
+    ])
 
     if (bodyOutOfTrack.length === 0) {
       this.vehicle.applyOutOfTrackPenalty()
+    }
+  }
+
+  checkBoxes(position: Vector3) {
+    this.raycaster.set(position, this.direction)
+
+    const intersects = this.raycaster.intersectObject(
+      this.part.trackBoxes,
+      false
+    )
+
+    if (this.vehicle.currentMaxSpeed === 360 && intersects.length) {
+      this.vehicle.setMaxSpeed(120)
+    } else if (this.vehicle.currentMaxSpeed === 120 && !intersects.length) {
+      this.vehicle.setMaxSpeed(360)
     }
   }
 
@@ -246,6 +262,7 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
       this.checkStartLap(position)
     } else {
       this.checkpoint(position)
+      this.checkBoxes(position)
       this.checkFinishLap(position)
     }
   }

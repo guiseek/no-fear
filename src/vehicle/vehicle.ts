@@ -28,6 +28,10 @@ export abstract class Vehicle<P extends VehiclePartMap> {
     return this.state.velocity.length()
   }
 
+  get currentMaxSpeed() {
+    return this.settings.maxSpeed
+  }
+
   get currentDirection() {
     return this.state.velocity.clone().normalize()
   }
