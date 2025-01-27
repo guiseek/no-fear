@@ -1,3 +1,4 @@
-export * from './mc-laren-mp4/index';
-export * from './vehicle';
+export * from './mc-laren-mp4';
 export * from './engine';
+export * from './vehicle-sound';
+export * from './vehicle';

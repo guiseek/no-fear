@@ -2,7 +2,7 @@ import {Font, GLTF, TextGeometry} from 'three/examples/jsm/Addons.js'
 import {McLarenMP4PartMap} from './mc-laren-mp4-part-map'
 import {DEG2RAD} from 'three/src/math/MathUtils.js'
 import {McLarenMP4Part} from './mc-laren-mp4-part'
-import {TrackSound} from '../../tracks'
+import {VehicleSound} from '../vehicle-sound'
 import {Action} from '../../states'
 import {Vehicle} from '../vehicle'
 import {Engine} from '../engine'
@@ -24,6 +24,15 @@ export class McLarenMP4 extends Vehicle<McLarenMP4PartMap> {
     brakeForce: 50000,
     lateralFriction: 0.7,
     maxSpeed: 360,
+    /**
+     * Velocidade mínima para iniciar derrapagem
+     */
+    driftThreshold: 120,
+
+    /**
+     * Intensidade da derrapagem
+     */
+    driftFactor: 0.2,
   }
 
   #part: McLarenMP4PartMap
@@ -41,7 +50,7 @@ export class McLarenMP4 extends Vehicle<McLarenMP4PartMap> {
     gltf: GLTF,
     private action: Action,
     private engine: Engine,
-    readonly trackSound: TrackSound,
+    readonly vehicleSound: VehicleSound,
     private font: Font
   ) {
     super(gltf)
@@ -129,8 +138,8 @@ export class McLarenMP4 extends Vehicle<McLarenMP4PartMap> {
     this.part.collision.wheel.back.left.visible = false
     this.part.collision.wheel.back.right.visible = false
 
-    this.part.collision.wheel.front.left.add(this.trackSound.chicane.left)
-    this.part.collision.wheel.front.right.add(this.trackSound.chicane.right)
+    this.part.collision.wheel.front.left.add(this.vehicleSound.chicane.left)
+    this.part.collision.wheel.front.right.add(this.vehicleSound.chicane.right)
 
     this.#lightBack = this.#part.lightBack.material as MeshStandardMaterial
 
@@ -149,18 +158,6 @@ export class McLarenMP4 extends Vehicle<McLarenMP4PartMap> {
   }
 
   reset() {
-    this.settings = {
-      mass: 540,
-      deceleration: 24,
-      tractionForceValue: 12000,
-      frictionFactorOutOfTrack: 0.99,
-      airResistance: 0.015,
-      rollingResistance: 12,
-      brakeForce: 50000,
-      lateralFriction: 0.7,
-      maxSpeed: 360,
-    }
-
     this.resetState()
 
     this.model.rotation.set(0, -1.6, 0)
@@ -172,6 +169,7 @@ export class McLarenMP4 extends Vehicle<McLarenMP4PartMap> {
     this.engine.update(this.state.rpm)
     this.#syncLocation(deltaTime)
     this.#syncWheels(deltaTime)
+    this.#applyDrift(deltaTime)
     this.#syncPanel()
   }
 
@@ -376,8 +374,7 @@ export class McLarenMP4 extends Vehicle<McLarenMP4PartMap> {
         Math.cos(this.model.rotation.y)
       )
     )
-    const wheelRotation =
-      (localVelocityZ / wheelRadius) * (deltaTime * wheelRadius)
+    const wheelRotation = (localVelocityZ / wheelRadius) * deltaTime
 
     this.#part.wheel.front.left.rotation.x += wheelRotation
     this.#part.wheel.front.right.rotation.x += wheelRotation
@@ -387,15 +384,43 @@ export class McLarenMP4 extends Vehicle<McLarenMP4PartMap> {
     const rpm = (Math.abs(localVelocityZ) * 60) / (2 * Math.PI * wheelRadius)
     this.state.rpm = parseFloat(rpm.toFixed(2))
   }
-}
 
-export const loadMcLarenMP4 = (
-  action: Action,
-  engine: Engine,
-  sound: TrackSound,
-  font: Font
-) => {
-  return (gltf: GLTF) => {
-    return new McLarenMP4(gltf, action, engine, sound, font)
+  #applyDrift(deltaTime: number) {
+    const speed = this.state.velocity.length()
+
+    // Verifica se o carro está em alta velocidade e virando
+    if (
+      speed > this.settings.driftThreshold &&
+      Math.abs(this.state.steering) > 0.6
+    ) {
+      const driftDirection = new Vector3(
+        -Math.cos(this.model.rotation.y + Math.PI / 2),
+        0,
+        -Math.sin(this.model.rotation.y + Math.PI / 2)
+      ).normalize()
+
+      // Aplica uma força lateral proporcional à velocidade e ao ângulo da direção
+      // const driftAmount =
+      //   speed * this.settings.driftFactor * Math.abs(this.state.steering)
+
+      // this.model.position.addScaledVector(
+      //   driftDirection,
+      //   driftAmount * deltaTime
+      // )
+
+      // Aplica uma força lateral proporcional à velocidade e ao ângulo da direção
+      const driftForce = driftDirection.multiplyScalar(
+        speed * this.settings.driftFactor * Math.abs(this.state.steering)
+      )
+
+      this.state.velocity.addScaledVector(driftForce, deltaTime)
+
+      // Condição explícita para tocar o som de derrapagem depois
+      if (this.action.button.a) {
+        this.vehicleSound.skid()
+      }
+    } else if (this.vehicleSound.isSkidding) {
+      this.vehicleSound.skid(false)
+    }
   }
 }

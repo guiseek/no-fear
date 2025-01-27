@@ -1,8 +1,13 @@
-import {TrackPartMap, TrackSoundMap, VehiclePartMap} from '../interfaces'
 import {Object3D, Raycaster, Vector3, Vector3Like} from 'three'
 import {GLTF} from 'three/examples/jsm/Addons.js'
 import {Vehicle} from '../vehicle'
 import {Entity} from '../core'
+import {
+  TrackPartMap,
+  TrackSettings,
+  TrackSoundMap,
+  VehiclePartMap,
+} from '../interfaces'
 
 export abstract class Track<
   P extends TrackPartMap,
@@ -15,11 +20,16 @@ export abstract class Track<
   protected currentLapTime?: number
   protected bestLapTime = Infinity
 
+  abstract settings: TrackSettings
+
+  protected state = {
+    checkpointCompleted: new Set<string>(),
+    currentLap: 0,
+  }
+
   abstract get part(): P
 
   abstract trackSound: S
-
-  abstract checkpointCompleted: Set<string>
 
   constructor(gltf: GLTF, protected vehicle: Vehicle<VehiclePartMap>) {
     super(gltf)

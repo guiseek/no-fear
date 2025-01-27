@@ -1,3 +1,4 @@
+export * from './championship';
 export * from './device-type';
 export * from './engine-options';
 export * from './gear-config';
@@ -8,8 +9,12 @@ export * from './range-value';
 export * from './sound-part';
 export * from './track-buffer-map';
 export * from './track-part-map';
+export * from './track-settings';
 export * from './track-sound-map';
 export * from './two-sides';
 export * from './type';
 export * from './updatable';
+export * from './vehcle-settings';
+export * from './vehicle-buffer-map';
 export * from './vehicle-part-map';
+export * from './vehicle-sound-map';

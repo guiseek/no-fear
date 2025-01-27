@@ -10,6 +10,7 @@ export * from './get-bounding-box';
 export * from './get-bounds';
 export * from './get-by-name';
 export * from './html';
+export * from './immutable';
 export * from './inner';
 export * from './interval';
 export * from './normalize-key';

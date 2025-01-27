@@ -3,7 +3,7 @@ import {FirstTrackPartMap} from './first-track-part-map'
 import {async, formatTime, interval} from '../../utils'
 import {MeshStandardMaterial, Vector3} from 'three'
 import {FirstTrackPart} from './first-track-part'
-import {VehiclePartMap} from '../../interfaces'
+import {TrackSettings, VehiclePartMap} from '../../interfaces'
 import {TrackSound} from '../track-sound'
 import {Vehicle} from '../../vehicle'
 import {Track} from '../track'
@@ -23,9 +23,10 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
     MeshStandardMaterial
   ]
 
-  checkpoints = new Set<string>()
-
-  checkpointCompleted = new Set<string>()
+  settings: TrackSettings = {
+    checkpoints: new Set<string>(),
+    laps: 4,
+  }
 
   constructor(
     gltf: GLTF,
@@ -74,7 +75,7 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
     ]
 
     for (const checkpoint of this.part.collision.checkpoints.children) {
-      this.checkpoints.add(checkpoint.name)
+      this.settings.checkpoints.add(checkpoint.name)
       checkpoint.visible = false
     }
   }
@@ -106,6 +107,10 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
   }
 
   checkpoint(position: Vector3) {
+    if (this.state.currentLap >= this.settings.laps) {
+      return
+    }
+
     this.raycaster.set(position, this.direction)
 
     const intersects = this.raycaster.intersectObjects(
@@ -115,8 +120,8 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
 
     if (intersects.length > 0) {
       const [{object}] = intersects
-      if (!this.checkpointCompleted.has(object.name)) {
-        this.checkpointCompleted.add(object.name)
+      if (!this.state.checkpointCompleted.has(object.name)) {
+        this.state.checkpointCompleted.add(object.name)
         this.trackSound.checkpoint.play()
       }
     }
@@ -141,6 +146,10 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
       return
     }
 
+    if (this.state.checkpointCompleted.size < this.settings.checkpoints.size) {
+      return
+    }
+
     this.raycaster.set(position, this.direction)
 
     const intersects = this.raycaster.intersectObject(
@@ -148,7 +157,17 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
       false
     )
 
-    if (intersects.length > 0) {
+    if (
+      this.state.currentLap < this.settings.laps &&
+      intersects.length > 0
+    ) {
+      this.state.currentLap += 1
+      this.state.checkpointCompleted.clear()
+    }
+
+    if (this.state.currentLap === this.settings.laps) {
+      this.vehicle.setMaxSpeed(100)
+
       this.currentLapTime = (performance.now() - this.lapStartTime) / 1000
 
       if (this.currentLapTime < this.bestLapTime) {
@@ -161,8 +180,6 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
 
       this.#setLapTimes()
 
-      this.checkpointCompleted.clear()
-
       this.lapStartTime = undefined
     }
   }
@@ -170,30 +187,28 @@ export class FirstTrack extends Track<FirstTrackPartMap, TrackSound> {
   contactDetector(_delta: number) {
     const {wheel, body} = this.vehicle.part.collision
 
-    const wheelFrontLeftOnChicanes = this.detectContact(
-      wheel.front.left,
-      this.part.chicanes.children
-    )
-    const wheelFrontRightOnChicanes = this.detectContact(
-      wheel.front.right,
-      this.part.chicanes.children
-    )
+    const wheelFrontLeftOnChicanes = this.detectContact(wheel.front.left, [
+      this.part.chicanes.children[1],
+    ])
+    const wheelFrontRightOnChicanes = this.detectContact(wheel.front.right, [
+      this.part.chicanes.children[0],
+    ])
 
     if (
       wheelFrontLeftOnChicanes.length &&
-      !this.trackSound.chicane.left.isPlaying
+      !this.vehicle.vehicleSound.chicane.left.isPlaying
     ) {
-      this.trackSound.chicane.left.play()
-    } else if (this.trackSound.chicane.left.isPlaying)
-      this.trackSound.chicane.left.stop()
+      this.vehicle.vehicleSound.chicane.left.play()
+    } else if (this.vehicle.vehicleSound.chicane.left.isPlaying)
+      this.vehicle.vehicleSound.chicane.left.stop()
 
     if (
       wheelFrontRightOnChicanes.length &&
-      !this.trackSound.chicane.right.isPlaying
+      !this.vehicle.vehicleSound.chicane.right.isPlaying
     ) {
-      this.trackSound.chicane.right.play()
-    } else if (this.trackSound.chicane.right.isPlaying)
-      this.trackSound.chicane.right.stop()
+      this.vehicle.vehicleSound.chicane.right.play()
+    } else if (this.vehicle.vehicleSound.chicane.right.isPlaying)
+      this.vehicle.vehicleSound.chicane.right.stop()
 
     const bodyOutOfTrack = this.detectContact(body, [this.part.track])
 

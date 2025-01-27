@@ -23,8 +23,8 @@ export class SVGIcon extends HTMLElement {
     const shadow = this.attachShadow({mode: 'open'})
 
     const icon = html`
-      <svg viewBox="0 0 80 20" xmlns="http://www.w3.org/2000/svg">
-        <use href="${this.#use}" width="24px" height="24px" />
+      <svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <use href="${this.#use}" />
       </svg>
     `
 

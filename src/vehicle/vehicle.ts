@@ -1,7 +1,7 @@
+import {VehiclePartMap, VehicleSettings} from '../interfaces'
 import {BufferGeometry, Object3D, Vector3} from 'three'
 import {GLTF} from 'three/examples/jsm/Addons.js'
-import {VehiclePartMap} from '../interfaces'
-import {TrackSound} from '../tracks'
+import {VehicleSound} from './vehicle-sound'
 
 export abstract class Vehicle<P extends VehiclePartMap> {
   #model: Object3D
@@ -10,17 +10,7 @@ export abstract class Vehicle<P extends VehiclePartMap> {
     return this.#model
   }
 
-  abstract settings: {
-    mass: number
-    deceleration: number
-    tractionForceValue: number
-    frictionFactorOutOfTrack: number
-    airResistance: number
-    rollingResistance: number
-    brakeForce: number
-    lateralFriction: number
-    maxSpeed: number
-  }
+  protected abstract settings: VehicleSettings
 
   protected state = {
     rpm: 0,
@@ -43,7 +33,7 @@ export abstract class Vehicle<P extends VehiclePartMap> {
   }
 
   abstract get part(): P
-  abstract trackSound: TrackSound
+  abstract vehicleSound: VehicleSound
 
   abstract celebrate(): void
 
@@ -67,6 +57,10 @@ export abstract class Vehicle<P extends VehiclePartMap> {
       resistanceForce: new Vector3(),
       angularVelocity: 0,
     }
+  }
+
+  setMaxSpeed(maxSpeed: number) {
+    this.settings.maxSpeed = maxSpeed
   }
 
   protected getBoundingBox(geometry: BufferGeometry) {

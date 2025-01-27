@@ -1,5 +1,5 @@
-import {TrackBufferMap, TrackSoundChicane, TrackSoundMap} from '../interfaces'
-import {Audio, AudioListener, PositionalAudio} from 'three'
+import {TrackBufferMap, TrackSoundMap} from '../interfaces'
+import {Audio, AudioListener} from 'three'
 
 export class TrackSound implements TrackSoundMap {
   startLight: Audio
@@ -11,8 +11,6 @@ export class TrackSound implements TrackSoundMap {
   bestLapTime: Audio
 
   victoryTheme: Audio
-
-  chicane: TrackSoundChicane
 
   constructor(listener: AudioListener, buffer: TrackBufferMap) {
     this.startLight = new Audio(listener)
@@ -30,26 +28,5 @@ export class TrackSound implements TrackSoundMap {
 
     this.victoryTheme = new Audio(listener)
     this.victoryTheme.setBuffer(buffer.victoryTheme)
-
-    this.chicane = {
-      left: new PositionalAudio(listener),
-      right: new PositionalAudio(listener),
-    }
-
-    this.chicane.left.setDistanceModel('linear')
-    this.chicane.left.setPlaybackRate(0.2)
-    this.chicane.left.setRolloffFactor(1)
-    this.chicane.left.setRefDistance(0.5)
-    this.chicane.left.setBuffer(buffer.chicane)
-    this.chicane.left.setLoop(true)
-    this.chicane.left.setVolume(0.2)
-
-    this.chicane.right.setDistanceModel('linear')
-    this.chicane.right.setPlaybackRate(0.2)
-    this.chicane.right.setRolloffFactor(1)
-    this.chicane.right.setRefDistance(0.5)
-    this.chicane.right.setBuffer(buffer.chicane)
-    this.chicane.right.setLoop(true)
-    this.chicane.right.setVolume(0.2)
   }
 }

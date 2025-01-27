@@ -1,7 +1,7 @@
 import {Camera, Input, Loader, Renderer, use} from './core'
 import {GearConfig, Updatable} from './interfaces'
 import {FirstTrack, TrackSound} from './tracks'
-import {Engine, McLarenMP4} from './vehicle'
+import {Engine, McLarenMP4, VehicleSound} from './vehicle'
 import {createLoadQueue} from './factories'
 import {Action, State} from './states'
 import {inputMapper} from './mappers'
@@ -73,6 +73,7 @@ export class Game {
       ],
       audio: [
         ['chicane.wav', 'Chicane sound'],
+        ['skidding.wav', 'Skidding sound'],
         ['start-light.wav', 'Start light'],
         ['start.wav', 'Start sound'],
         ['running.wav', 'Running sound'],
@@ -88,6 +89,7 @@ export class Game {
     const [mcLarenModel, trackModel] = resources.gltf
     const [
       chicane,
+      skidding,
       startLight,
       startBuffer,
       runningBuffer,
@@ -181,13 +183,14 @@ export class Game {
           const engine = new Engine({start, gears})
 
           const trackSound = new TrackSound(listener, {
-            chicane,
             startLight,
             checkpoint,
             lapTime,
             bestLapTime,
             victoryTheme,
           })
+
+          const vehicleSound = new VehicleSound(listener, {chicane, skidding})
 
           /**
            * McLaren
@@ -196,7 +199,7 @@ export class Game {
             mcLarenModel,
             this.action,
             engine,
-            trackSound,
+            vehicleSound,
             sevenSegment
           )
 
