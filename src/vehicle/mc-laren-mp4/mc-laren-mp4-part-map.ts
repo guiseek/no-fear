@@ -27,4 +27,5 @@ export interface McLarenMP4PartMap extends VehiclePartMap {
   panel: McLarenMP4Panel
   body: Object3D
   flag: Object3D
+  mirror: TwoSides<Mesh>
 }

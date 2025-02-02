@@ -1,7 +1,7 @@
 import {Axes, Buttons, InputState, use} from '../core'
 
-const fromKeyboard = ({b, up, down, left, right}: InputState) => {
-  const buttons = {a: b, b: up, x: false, y: down}
+const fromKeyboard = ({b, t, up, down, left, right}: InputState) => {
+  const buttons = {a: b, b: up, x: t, y: down}
 
   const directions = {up, down, left, right}
 

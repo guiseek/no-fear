@@ -235,6 +235,8 @@ export class Game {
             this.#running = true
           })
 
+          console.log(this.#updatables)
+
           this.#animate()
 
           this.input.on('update', async (state) => {

@@ -21,4 +21,6 @@ export const enum McLarenMP4Part {
   LightBack = `LIGHT_BACK`,
   Body = `SUSPENSION_FRONT`,
   FlagParent = `FLAG_PARENT`,
+  MirrorLeft = `MIRROR_LEFT`,
+  MirrorRight = `MIRROR_RIGHT`,
 }
